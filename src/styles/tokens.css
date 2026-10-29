@@ -1,0 +1,264 @@
+/* AirLoop — Premium Industrial IoT Dual-Theme Design Tokens */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+/* ─── Default / Dark Theme ─── */
+:root,
+[data-theme="dark"],
+.dark {
+  color-scheme: dark;
+
+  /* Background Layers */
+  --bg-primary:    #0A0E1A;
+  --bg-secondary:  #0F1525;
+  --bg-tertiary:   #141928;
+  --surface-1:     #161D2F;
+  --surface-2:     #1C2540;
+  --surface-3:     #202C48;
+  --surface-input: rgba(255, 255, 255, 0.03);
+  --surface-hover: #202C48;
+  --surface-glass: rgba(22, 29, 47, 0.85);
+
+  /* Layout Chrome */
+  --header-bg:        rgba(10, 14, 26, 0.95);
+  --header-border:    rgba(255, 255, 255, 0.07);
+  --sidebar-bg:       rgba(10, 14, 26, 0.95);
+  --sidebar-card-bg:  #1C2540;
+  --sidebar-border:   rgba(255, 255, 255, 0.06);
+  --mobilenav-bg:     rgba(10, 14, 26, 0.97);
+  --mobilenav-border: rgba(255, 255, 255, 0.07);
+
+  /* Accents */
+  --accent-primary:      #00D4AA;        /* Cyan-teal — primary brand */
+  --accent-primary-dim:  rgba(0, 212, 170, 0.10);
+  --accent-primary-glow: rgba(0, 212, 170, 0.22);
+  --accent-secondary:    #3B82F6;        /* Electric blue */
+  --accent-secondary-dim: rgba(59, 130, 246, 0.12);
+  --accent-amber:        #F59E0B;        /* Warning / Demo */
+  --accent-amber-dim:    rgba(245, 158, 11, 0.12);
+
+  /* Typography */
+  --text-primary:    #E8EDF5;
+  --text-secondary:  #8A97B0;
+  --text-muted:      #5A677D;
+  --text-accent:     #00D4AA;
+  --text-on-accent:  #0A0E1A;
+
+  /* Status Colors */
+  --color-success:     #10B981;
+  --color-success-dim: rgba(16, 185, 129, 0.12);
+  --color-warning:     #F59E0B;
+  --color-warning-dim: rgba(245, 158, 11, 0.12);
+  --color-error:       #EF4444;
+  --color-error-dim:   rgba(239, 68, 68, 0.12);
+  --color-info:        #3B82F6;
+  --color-info-dim:    rgba(59, 130, 246, 0.12);
+
+  /* Borders */
+  --border-subtle:  rgba(255, 255, 255, 0.07);
+  --border-medium:  rgba(255, 255, 255, 0.12);
+  --border-accent:  rgba(0, 212, 170, 0.30);
+  --border-strong:  rgba(255, 255, 255, 0.18);
+  --border-card:    rgba(255, 255, 255, 0.07);
+
+  /* Shadows */
+  --shadow-sm:   0 1px 3px rgba(0, 0, 0, 0.40);
+  --shadow-md:   0 4px 16px rgba(0, 0, 0, 0.50);
+  --shadow-lg:   0 12px 40px rgba(0, 0, 0, 0.60);
+  --shadow-glow: 0 0 24px rgba(0, 212, 170, 0.18);
+  --shadow-blue: 0 0 24px rgba(59, 130, 246, 0.18);
+
+  /* Fan Visualizer Theming */
+  --fan-housing-bg:          radial-gradient(circle, #1C2540 60%, #0F1525 100%);
+  --fan-housing-border:      rgba(255, 255, 255, 0.08);
+  --fan-housing-border-run:  rgba(0, 212, 170, 0.30);
+  --fan-blade-grad-start:    #334155;
+  --fan-blade-grad-mid:      #475569;
+  --fan-blade-grad-end:      #2D3748;
+  --fan-hub-start:           #2D3A5A;
+  --fan-hub-end:             #1C2540;
+  --fan-center-badge-bg:     rgba(10, 14, 26, 0.88);
+  --fan-center-badge-border: rgba(255, 255, 255, 0.08);
+  --fan-tick-inactive:       rgba(255, 255, 255, 0.08);
+
+  /* Charts */
+  --chart-grid:           rgba(255, 255, 255, 0.05);
+  --chart-axis:           #5A677D;
+  --chart-tooltip-bg:     #0F1525;
+  --chart-tooltip-border: rgba(0, 212, 170, 0.3);
+  --chart-tooltip-text:   #E8EDF5;
+
+  /* Ambient Glow */
+  --ambient-glow-1: rgba(0, 212, 170, 0.06);
+  --ambient-glow-2: rgba(59, 130, 246, 0.05);
+
+  /* Demo Banner */
+  --banner-bg:      rgba(245, 158, 11, 0.07);
+  --banner-border:  rgba(245, 158, 11, 0.18);
+  --banner-text:    #F59E0B;
+  --banner-subtext: #8A7A60;
+
+  /* Button Translucents */
+  --btn-subtle-bg:     rgba(255, 255, 255, 0.04);
+  --btn-subtle-border: rgba(255, 255, 255, 0.08);
+  --btn-subtle-hover:  rgba(255, 255, 255, 0.08);
+
+  /* shadcn/ui Theme Token Aliases */
+  --background: var(--bg-primary);
+  --foreground: var(--text-primary);
+  --card: var(--surface-1);
+  --card-foreground: var(--text-primary);
+  --popover: var(--surface-1);
+  --popover-foreground: var(--text-primary);
+  --primary: var(--accent-primary);
+  --primary-foreground: var(--text-on-accent);
+  --secondary: var(--surface-2);
+  --secondary-foreground: var(--text-secondary);
+  --muted: var(--surface-3);
+  --muted-foreground: var(--text-muted);
+  --accent: var(--accent-primary-dim);
+  --accent-foreground: var(--accent-primary);
+  --destructive: var(--color-error);
+  --destructive-foreground: #FFFFFF;
+  --border: var(--border-subtle);
+  --input: var(--surface-input);
+  --ring: var(--accent-primary);
+}
+
+/* ─── Premium Light Theme ─── */
+[data-theme="light"],
+.light {
+  color-scheme: light;
+
+  /* Sophisticated warm-white & clean white surfaces */
+  --bg-primary:    #FAF9F6;          /* Refined warm-white canvas */
+  --bg-secondary:  #FFFFFF;          /* Pure white card surface */
+  --bg-tertiary:   #F3F5F8;          /* Light contrast surface */
+  --surface-1:     #FFFFFF;          /* Clean white cards */
+  --surface-2:     #F8FAFC;          /* Sub-layer cards & containers */
+  --surface-3:     #EEF2F6;          /* Recessed tracks & segments */
+  --surface-input: #FFFFFF;          /* Inputs background */
+  --surface-hover: #F1F5F9;          /* Hover highlight */
+  --surface-glass: rgba(255, 255, 255, 0.94);
+
+  /* Layout Chrome */
+  --header-bg:        rgba(255, 255, 255, 0.90);
+  --header-border:    #E2E8F0;
+  --sidebar-bg:       #F4F6FA;        /* Distinctly tinted cool-slate sidebar */
+  --sidebar-card-bg:  #FFFFFF;        /* Elevated white card in sidebar */
+  --sidebar-border:   #E2E8F0;
+  --mobilenav-bg:     rgba(255, 255, 255, 0.96);
+  --mobilenav-border: #E2E8F0;
+
+  /* Accents — refined cyan-teal & clean royal blue */
+  --accent-primary:      #0D9488;        /* Refined teal / cyan (WCAG AA compliant contrast) */
+  --accent-primary-dim:  rgba(13, 148, 136, 0.10);
+  --accent-primary-glow: rgba(13, 148, 136, 0.18);
+  --accent-secondary:    #2563EB;        /* Clean vibrant blue */
+  --accent-secondary-dim: rgba(37, 99, 235, 0.10);
+  --accent-amber:        #D97706;        /* Warm amber */
+  --accent-amber-dim:    rgba(217, 119, 6, 0.10);
+
+  /* Deep Navy & Slate Typography */
+  --text-primary:    #0B192C;          /* Deep Navy (high readability) */
+  --text-secondary:  #334155;          /* Medium Slate */
+  --text-muted:      #64748B;          /* Cool Gray (> 4.5:1 accessible contrast) */
+  --text-accent:     #0D9488;
+  --text-on-accent:  #FFFFFF;
+
+  /* Status Colors */
+  --color-success:     #059669;
+  --color-success-dim: rgba(5, 150, 105, 0.10);
+  --color-warning:     #D97706;
+  --color-warning-dim: rgba(217, 119, 6, 0.10);
+  --color-error:       #DC2626;
+  --color-error-dim:   rgba(220, 38, 38, 0.10);
+  --color-info:        #2563EB;
+  --color-info-dim:    rgba(37, 99, 235, 0.10);
+
+  /* Borders — subtle cool-gray */
+  --border-subtle:  #E2E8F0;
+  --border-medium:  #CBD5E1;
+  --border-accent:  rgba(13, 148, 136, 0.35);
+  --border-strong:  #94A3B8;
+  --border-card:    #E2E8F0;
+
+  /* Soft Shadows — high-end SaaS feel */
+  --shadow-sm:   0 1px 3px 0 rgba(15, 23, 42, 0.04);
+  --shadow-md:   0 4px 14px -1px rgba(15, 23, 42, 0.07), 0 2px 4px -2px rgba(15, 23, 42, 0.03);
+  --shadow-lg:   0 12px 28px -4px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.03);
+  --shadow-glow: 0 0 20px rgba(13, 148, 136, 0.14);
+  --shadow-blue: 0 0 20px rgba(37, 99, 235, 0.14);
+
+  /* Fan Visualizer Theming */
+  --fan-housing-bg:          radial-gradient(circle, #FFFFFF 62%, #F1F5F9 100%);
+  --fan-housing-border:      #E2E8F0;
+  --fan-housing-border-run:  #0D9488;
+  --fan-blade-grad-start:    #64748B;
+  --fan-blade-grad-mid:      #94A3B8;
+  --fan-blade-grad-end:      #CBD5E1;
+  --fan-hub-start:           #F8FAFC;
+  --fan-hub-end:             #E2E8F0;
+  --fan-center-badge-bg:     rgba(255, 255, 255, 0.96);
+  --fan-center-badge-border: #E2E8F0;
+  --fan-tick-inactive:       #E2E8F0;
+
+  /* Charts */
+  --chart-grid:           #EDF2F7;
+  --chart-axis:           #64748B;
+  --chart-tooltip-bg:     #FFFFFF;
+  --chart-tooltip-border: #CBD5E1;
+  --chart-tooltip-text:   #0B192C;
+
+  /* Ambient Glow */
+  --ambient-glow-1: rgba(13, 148, 136, 0.035);
+  --ambient-glow-2: rgba(37, 99, 235, 0.03);
+
+  /* Demo Banner */
+  --banner-bg:      #FFFBEB;
+  --banner-border:  #FDE68A;
+  --banner-text:    #92400E;
+  --banner-subtext: #B45309;
+
+  /* Button Translucents */
+  --btn-subtle-bg:     #F8FAFC;
+  --btn-subtle-border: #E2E8F0;
+  --btn-subtle-hover:  #EEF2F6;
+
+  /* shadcn/ui Theme Token Aliases */
+  --background: var(--bg-primary);
+  --foreground: var(--text-primary);
+  --card: var(--surface-1);
+  --card-foreground: var(--text-primary);
+  --popover: var(--surface-1);
+  --popover-foreground: var(--text-primary);
+  --primary: var(--accent-primary);
+  --primary-foreground: var(--text-on-accent);
+  --secondary: var(--surface-2);
+  --secondary-foreground: var(--text-secondary);
+  --muted: var(--surface-3);
+  --muted-foreground: var(--text-muted);
+  --accent: var(--accent-primary-dim);
+  --accent-foreground: var(--accent-primary);
+  --destructive: var(--color-error);
+  --destructive-foreground: #FFFFFF;
+  --border: var(--border-subtle);
+  --input: var(--surface-input);
+  --ring: var(--accent-primary);
+}
+
+/* ─── Shared Scales ─── */
+:root {
+  --font-sans:    'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-display: 'Space Grotesk', var(--font-sans);
+  --font-mono:    'JetBrains Mono', 'Fira Code', Consolas, monospace;
+
+  --radius-sm:   6px;
+  --radius-md:  10px;
+  --radius-lg:  14px;
+  --radius-xl:  20px;
+  --radius-full: 9999px;
+
+  --transition-fast:   140ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 240ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow:   380ms cubic-bezier(0.4, 0, 0.2, 1);
+}
