@@ -71,7 +71,7 @@ export const SensorsPage: React.FC = () => {
         {/* 1. Room Temperature */}
         <SensorCard
           title="Room Temperature"
-          subtitle="DHT11 comfort sensor"
+          subtitle="DHT22 climate sensor (GPIO 4)"
           value={isConnected && telemetry.comfortTemperatureC !== null ? `${telemetry.comfortTemperatureC.toFixed(1)}` : '—'}
           unit="°C"
           status={isConnected && telemetry.sensorHealth.comfortDht11 === 'OK' ? 'ONLINE' : 'OFFLINE'}
@@ -79,7 +79,7 @@ export const SensorsPage: React.FC = () => {
           description={isConnected && telemetry.comfortTemperatureC !== null
             ? (telemetry.comfortTemperatureC < 26 ? 'Cool environment — comfortable'
               : telemetry.comfortTemperatureC <= 29 ? 'Ideal temperature range'
-              : 'Warm — fan assist recommended')
+              : 'Warm — fan assist active')
             : 'Sensor offline — hardware disconnected'}
           icon={<Thermometer size={19} />}
         />
@@ -87,13 +87,13 @@ export const SensorsPage: React.FC = () => {
         {/* 2. Humidity Level */}
         <SensorCard
           title="Humidity Level"
-          subtitle="DHT11 moisture sensor"
-          value={isConnected && telemetry.wetZoneHumidityPercent !== null ? `${telemetry.wetZoneHumidityPercent}` : '—'}
+          subtitle="DHT22 humidity sensor (GPIO 4)"
+          value={isConnected && telemetry.comfortHumidityPercent !== null ? `${telemetry.comfortHumidityPercent}` : '—'}
           unit="%"
           status={isConnected && telemetry.sensorHealth.wetDht11 === 'OK' ? 'ONLINE' : 'OFFLINE'}
           statusText={isConnected ? 'Reading' : 'Offline'}
-          description={isConnected && telemetry.humidityBaselinePercent !== null
-            ? `Baseline target: ${telemetry.humidityBaselinePercent}% — auto exhaust armed`
+          description={isConnected && telemetry.comfortHumidityPercent !== null
+            ? (telemetry.comfortHumidityPercent <= 60 ? 'Optimal moisture level' : 'Elevated moisture detected')
             : 'Sensor offline — hardware disconnected'}
           icon={<Droplets size={19} />}
         />
@@ -179,12 +179,12 @@ export const SensorsPage: React.FC = () => {
               </thead>
               <tbody>
                 {[
-                  { pin: 'GPIO 4',  component: 'DHT11 Comfort Sensor',  protocol: '1-Wire Single Bus',       value: isConnected && telemetry.comfortTemperatureC !== null ? `${telemetry.comfortTemperatureC.toFixed(1)}°C / ${telemetry.comfortHumidityPercent}%` : 'Unavailable' },
-                  { pin: 'GPIO 5',  component: 'DHT11 Moisture Sensor', protocol: '1-Wire Single Bus',       value: isConnected && telemetry.wetZoneHumidityPercent !== null ? `${telemetry.wetZoneHumidityPercent}% RH` : 'Unavailable' },
-                  { pin: 'GPIO 27', component: 'HC-SR501 PIR Sensor',   protocol: 'Digital GPIO Interrupt',  value: isConnected ? (telemetry.occupancyDetected ? 'HIGH — Active Presence' : 'LOW — Room Idle') : 'Unavailable' },
-                  { pin: 'GPIO 25', component: 'Fan MOSFET (IRLZ44N)',  protocol: 'LEDC 25kHz PWM Output',   value: isConnected ? `${telemetry.requestedFanSpeedPercent}% Duty Cycle` : 'Unavailable' },
-                  { pin: 'GPIO 26', component: 'Exhaust Fan Relay',     protocol: 'Digital Relay Output',    value: isConnected ? (telemetry.exhaustFanState ? 'RELAY CLOSED — Active' : 'RELAY OPEN — Standby') : 'Unavailable' },
-                  { pin: 'System',  component: 'ESP32 Dual-Core MCU',   protocol: 'HTTP / JSON REST API',    value: isConnected ? `Free Heap: ${metrics?.freeHeapBytes ? Math.round(metrics.freeHeapBytes / 1024) : 198} KB` : 'Offline' },
+                  { pin: 'GPIO 4',  component: 'DHT22 Temperature Sensor', protocol: '1-Wire Digital Bus',       value: isConnected && telemetry.comfortTemperatureC !== null ? `${telemetry.comfortTemperatureC.toFixed(1)}°C` : 'Unavailable' },
+                  { pin: 'GPIO 4',  component: 'DHT22 Humidity Sensor',    protocol: '1-Wire Digital Bus',       value: isConnected && telemetry.comfortHumidityPercent !== null ? `${telemetry.comfortHumidityPercent}% RH` : 'Unavailable' },
+                  { pin: 'GPIO 25', component: 'Fan Motor Driver PWM',     protocol: 'LEDC 25kHz PWM Output',   value: isConnected ? `${telemetry.requestedFanSpeedPercent}% Duty Cycle` : 'Unavailable' },
+                  { pin: 'Wi-Fi',   component: 'ESP32 Wi-Fi REST API',     protocol: 'GET /api/status (JSON)',   value: isConnected ? 'Online (2s Polling)' : 'Offline' },
+                  { pin: 'Serial',  component: 'UART Debug Port',          protocol: '115200 Baud',              value: 'Active' },
+                  { pin: 'MCU',     component: 'ESP32 Development Board',  protocol: 'FreeRTOS / Arduino',       value: isConnected ? `Free Heap: ${metrics?.freeHeapBytes ? Math.round(metrics.freeHeapBytes / 1024) : 198} KB` : 'Offline' },
                 ].map((row, idx, arr) => (
                   <tr key={row.pin} style={{ borderBottom: idx < arr.length - 1 ? '1px solid var(--border-subtle)' : 'none' }}>
                     <td style={{ padding: '13px 16px', fontFamily: 'var(--font-mono)', fontWeight: 700, color: 'var(--accent-primary)', fontSize: '0.84rem' }}>{row.pin}</td>

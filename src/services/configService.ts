@@ -3,8 +3,8 @@ import { DeviceConfig } from '../types/telemetry';
 const STORAGE_KEY_CONFIG = 'airloop_device_config';
 
 export const DEFAULT_CONFIG: DeviceConfig = {
-  deviceName: 'AirLoop Controller 01',
-  esp32BaseUrl: 'http://192.168.1.100',
+  deviceName: 'AirLoop ESP32',
+  esp32BaseUrl: 'http://192.168.1.50',
   pollingIntervalMs: 2000,
   connectionTimeoutMs: 3500,
 

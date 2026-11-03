@@ -1,126 +1,126 @@
 /* ═══════════════════════════════════════════════════════════════
-   AIRLOOP — Sage, Slate & Teal Design Tokens
-   Premium Smart Climate Control Product
+   AIRLOOP — Dark Premium Design Tokens
+   Slate Navy × Electric Teal Identity
    ═══════════════════════════════════════════════════════════════ */
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
-  color-scheme: light;
+  color-scheme: dark;
 
   /* ── Primary Page Backgrounds ──────────────────────────────── */
-  --bg-page:        #E9EFEC;          /* Warm pale sage-gray */
-  --bg-primary:     #E9EFEC;          /* alias */
-  --bg-secondary:   #DFE7E2;          /* Sidebar / deeper sage */
-  --bg-tertiary:    #D4DDD8;          /* Deeper grouped areas */
-  --bg-elevated:    #E2EAEF;          /* Muted blue-gray elevated surfaces */
+  --bg-page:        #111923;          /* Deep slate navy */
+  --bg-primary:     #111923;          /* alias */
+  --bg-secondary:   #18232F;          /* Sidebar / rich charcoal slate */
+  --bg-tertiary:    #1C2A38;          /* Deeper grouped areas */
+  --bg-elevated:    #263746;          /* Elevated accent surface */
 
   /* ── Surface Layers ────────────────────────────────────────── */
-  --surface-card:     #F8FAF8;                    /* Main card: soft ivory */
-  --surface-1:        #F8FAF8;                    /* alias */
-  --surface-2:        #EFF4F1;                    /* Nested / grouped surface */
-  --surface-3:        #E2EAE5;                    /* Track / toggle base */
-  --surface-input:    #F4F8F5;                    /* Form inputs */
-  --surface-hover:    rgba(8, 127, 140, 0.06);   /* Interactive hover tint */
-  --surface-glass:    rgba(248, 250, 248, 0.82); /* Glassmorphism surface */
-  --surface-solid:    #F8FAF8;                    /* Fully solid card */
-  --surface-active:   rgba(8, 127, 140, 0.09);  /* Active/selected tint */
+  --surface-card:     #202D3A;                    /* Main card: elevated slate */
+  --surface-1:        #202D3A;                    /* alias */
+  --surface-2:        #263746;                    /* Nested / secondary surface */
+  --surface-3:        #2E4155;                    /* Track / toggle base */
+  --surface-input:    #1C2A38;                    /* Form inputs */
+  --surface-hover:    rgba(53, 214, 194, 0.07);  /* Interactive hover tint */
+  --surface-glass:    rgba(32, 45, 58, 0.85);    /* Glassmorphism surface */
+  --surface-solid:    #202D3A;                    /* Fully solid card */
+  --surface-active:   rgba(53, 214, 194, 0.10);  /* Active/selected tint */
 
   /* ── Layout Chrome ─────────────────────────────────────────── */
-  --header-bg:        rgba(248, 250, 248, 0.92);
-  --header-border:    rgba(29, 48, 46, 0.10);
-  --sidebar-bg:       #DFE7E2;
-  --sidebar-border:   rgba(29, 48, 46, 0.10);
-  --mobilenav-bg:     rgba(248, 250, 248, 0.97);
-  --mobilenav-border: rgba(29, 48, 46, 0.12);
+  --header-bg:        rgba(17, 25, 35, 0.94);
+  --header-border:    rgba(53, 214, 194, 0.12);
+  --sidebar-bg:       #18232F;
+  --sidebar-border:   rgba(53, 214, 194, 0.10);
+  --mobilenav-bg:     rgba(24, 35, 47, 0.97);
+  --mobilenav-border: rgba(53, 214, 194, 0.14);
 
-  /* ── Accent Colors — Teal & Forest Green ───────────────────── */
-  --accent-primary:        #087F8C;          /* Rich teal */
-  --accent-primary-hover:  #066B77;          /* Darker teal on hover */
-  --accent-primary-deep:   #055F6A;          /* Deepest teal */
-  --accent-primary-light:  rgba(8, 127, 140, 0.12);
-  --accent-primary-dim:    rgba(8, 127, 140, 0.14);
-  --accent-primary-glow:   rgba(8, 127, 140, 0.22);
-  --accent-primary-bg:     rgba(8, 127, 140, 0.08);
+  /* ── Accent Colors — Electric Teal & Sky Blue ───────────────── */
+  --accent-primary:        #35D6C2;          /* Electric teal */
+  --accent-primary-hover:  #2EC2B0;          /* Slightly deeper teal */
+  --accent-primary-deep:   #25A898;          /* Deepest teal */
+  --accent-primary-light:  rgba(53, 214, 194, 0.15);
+  --accent-primary-dim:    rgba(53, 214, 194, 0.14);
+  --accent-primary-glow:   rgba(53, 214, 194, 0.28);
+  --accent-primary-bg:     rgba(53, 214, 194, 0.10);
 
-  --accent-secondary:      #397A65;          /* Muted forest green */
-  --accent-secondary-dim:  rgba(57, 122, 101, 0.14);
-  --accent-secondary-bg:   rgba(57, 122, 101, 0.08);
+  --accent-secondary:      #62A8FF;          /* Sky blue */
+  --accent-secondary-dim:  rgba(98, 168, 255, 0.15);
+  --accent-secondary-bg:   rgba(98, 168, 255, 0.10);
 
-  --accent-highlight:      #B8E5DF;          /* Soft aqua highlight */
+  --accent-highlight:      rgba(53, 214, 194, 0.20); /* Teal glow highlight */
 
   /* ── Typography ─────────────────────────────────────────────── */
-  --text-primary:    #1D302E;          /* Deep charcoal-green */
-  --text-secondary:  #526663;          /* Slate gray */
-  --text-muted:      #7A9490;          /* Muted hint text */
-  --text-accent:     #087F8C;          /* Teal text accent */
-  --text-on-accent:  #FFFFFF;          /* Text over teal buttons */
-  --text-on-dark:    #F8FAF8;
+  --text-primary:    #F2F6FA;          /* Crisp soft white */
+  --text-secondary:  #AAB8C6;          /* Cool gray */
+  --text-muted:      #6B7F91;          /* Muted hint text */
+  --text-accent:     #35D6C2;          /* Teal text accent */
+  --text-on-accent:  #0C1F2A;          /* Dark text over teal buttons */
+  --text-on-dark:    #F2F6FA;
 
   /* ── Status Semantic Colors ────────────────────────────────── */
-  --color-success:      #1B8A5A;
-  --color-success-dim:  rgba(27, 138, 90, 0.12);
-  --color-success-bg:   rgba(27, 138, 90, 0.09);
+  --color-success:      #34D399;          /* Emerald green */
+  --color-success-dim:  rgba(52, 211, 153, 0.15);
+  --color-success-bg:   rgba(52, 211, 153, 0.10);
 
-  --color-warning:      #B5700A;
-  --color-warning-dim:  rgba(181, 112, 10, 0.14);
-  --color-warning-bg:   rgba(181, 112, 10, 0.09);
+  --color-warning:      #FBBF24;          /* Warm amber */
+  --color-warning-dim:  rgba(251, 191, 36, 0.15);
+  --color-warning-bg:   rgba(251, 191, 36, 0.10);
 
-  --color-error:        #B83232;
-  --color-error-dim:    rgba(184, 50, 50, 0.14);
-  --color-error-bg:     rgba(184, 50, 50, 0.09);
+  --color-error:        #F87171;          /* Muted coral red */
+  --color-error-dim:    rgba(248, 113, 113, 0.15);
+  --color-error-bg:     rgba(248, 113, 113, 0.10);
 
-  --color-info:         #2F6FB5;
-  --color-info-dim:     rgba(47, 111, 181, 0.14);
+  --color-info:         #60A5FA;          /* Sky blue info */
+  --color-info-dim:     rgba(96, 165, 250, 0.15);
 
   /* ── Borders ────────────────────────────────────────────────── */
-  --border-subtle:  rgba(29, 48, 46, 0.07);
-  --border-medium:  rgba(29, 48, 46, 0.13);
-  --border-strong:  rgba(29, 48, 46, 0.20);
-  --border-accent:  rgba(8, 127, 140, 0.35);
-  --border-card:    #CCD8D2;          /* Visible sage border */
-  --border-card-hover: rgba(8, 127, 140, 0.30);
+  --border-subtle:  rgba(242, 246, 250, 0.05);
+  --border-medium:  rgba(242, 246, 250, 0.10);
+  --border-strong:  rgba(242, 246, 250, 0.18);
+  --border-accent:  rgba(53, 214, 194, 0.35);
+  --border-card:    rgba(242, 246, 250, 0.09);  /* Subtle card border */
+  --border-card-hover: rgba(53, 214, 194, 0.32);
 
-  /* ── Refined Shadows (Sage-tinted) ─────────────────────────── */
-  --shadow-xs:  0 1px 3px rgba(29, 48, 46, 0.08);
-  --shadow-sm:  0 2px 8px rgba(29, 48, 46, 0.09), 0 1px 3px rgba(29, 48, 46, 0.05);
-  --shadow-md:  0 4px 16px rgba(29, 48, 46, 0.11), 0 2px 6px rgba(29, 48, 46, 0.06);
-  --shadow-lg:  0 8px 28px rgba(29, 48, 46, 0.13), 0 4px 12px rgba(29, 48, 46, 0.07);
-  --shadow-xl:  0 20px 48px rgba(29, 48, 46, 0.15), 0 8px 20px rgba(29, 48, 46, 0.09);
-  --shadow-inset: inset 0 1px 2px rgba(29, 48, 46, 0.07);
-  --shadow-teal:  0 4px 18px rgba(8, 127, 140, 0.22);
-  --shadow-card:  0 2px 10px rgba(29, 48, 46, 0.08), 0 1px 4px rgba(29, 48, 46, 0.05);
+  /* ── Dark Shadows (depth on dark bg) ────────────────────────── */
+  --shadow-xs:  0 1px 3px rgba(0, 0, 0, 0.25);
+  --shadow-sm:  0 2px 8px rgba(0, 0, 0, 0.30), 0 1px 3px rgba(0, 0, 0, 0.20);
+  --shadow-md:  0 4px 16px rgba(0, 0, 0, 0.35), 0 2px 6px rgba(0, 0, 0, 0.20);
+  --shadow-lg:  0 8px 28px rgba(0, 0, 0, 0.40), 0 4px 12px rgba(0, 0, 0, 0.25);
+  --shadow-xl:  0 20px 48px rgba(0, 0, 0, 0.50), 0 8px 20px rgba(0, 0, 0, 0.30);
+  --shadow-inset: inset 0 1px 2px rgba(0, 0, 0, 0.25);
+  --shadow-teal:  0 4px 20px rgba(53, 214, 194, 0.30), 0 0 0 1px rgba(53, 214, 194, 0.15);
+  --shadow-card:  0 2px 10px rgba(0, 0, 0, 0.30), 0 1px 4px rgba(0, 0, 0, 0.20);
 
   /* ── Fan Visualizer ─────────────────────────────────────────── */
-  --fan-housing-bg:          radial-gradient(circle at 40% 35%, #DFE8E4 0%, #CDD9D4 65%, #BFD0CA 100%);
-  --fan-housing-border:      rgba(29, 48, 46, 0.16);
-  --fan-housing-border-run:  #087F8C;
-  --fan-blade-grad-start:    #397A65;
-  --fan-blade-grad-mid:      #2B6050;
-  --fan-blade-grad-end:      #1D4035;
-  --fan-hub-start:           #7A9490;
-  --fan-hub-end:             #3A5C58;
-  --fan-center-badge-bg:     rgba(248, 250, 248, 0.97);
-  --fan-center-badge-border: rgba(8, 127, 140, 0.28);
-  --fan-tick-inactive:       rgba(29, 48, 46, 0.12);
+  --fan-housing-bg:          radial-gradient(circle at 40% 35%, #2A3D50 0%, #1E3040 65%, #162535 100%);
+  --fan-housing-border:      rgba(53, 214, 194, 0.22);
+  --fan-housing-border-run:  #35D6C2;
+  --fan-blade-grad-start:    #35D6C2;
+  --fan-blade-grad-mid:      #2BB8A6;
+  --fan-blade-grad-end:      #1E8A80;
+  --fan-hub-start:           #4A6278;
+  --fan-hub-end:             #2E4255;
+  --fan-center-badge-bg:     rgba(32, 45, 58, 0.97);
+  --fan-center-badge-border: rgba(53, 214, 194, 0.35);
+  --fan-tick-inactive:       rgba(242, 246, 250, 0.10);
 
   /* ── Charts ─────────────────────────────────────────────────── */
-  --chart-grid:           rgba(29, 48, 46, 0.07);
-  --chart-axis:           #7A9490;
-  --chart-tooltip-bg:     rgba(248, 250, 248, 0.99);
-  --chart-tooltip-border: rgba(8, 127, 140, 0.28);
-  --chart-tooltip-text:   #1D302E;
+  --chart-grid:           rgba(242, 246, 250, 0.06);
+  --chart-axis:           #6B7F91;
+  --chart-tooltip-bg:     rgba(32, 45, 58, 0.98);
+  --chart-tooltip-border: rgba(53, 214, 194, 0.30);
+  --chart-tooltip-text:   #F2F6FA;
 
   /* ── Ambient Background ─────────────────────────────────────── */
-  --ambient-glow-1: rgba(8, 127, 140, 0.05);
-  --ambient-glow-2: rgba(57, 122, 101, 0.04);
-  --ambient-glow-3: rgba(184, 229, 223, 0.12);
+  --ambient-glow-1: rgba(53, 214, 194, 0.04);
+  --ambient-glow-2: rgba(98, 168, 255, 0.03);
+  --ambient-glow-3: rgba(53, 214, 194, 0.06);
 
   /* ── Button Tokens ──────────────────────────────────────────── */
-  --btn-subtle-bg:     rgba(29, 48, 46, 0.06);
-  --btn-subtle-border: rgba(29, 48, 46, 0.12);
-  --btn-subtle-hover:  rgba(29, 48, 46, 0.10);
+  --btn-subtle-bg:     rgba(242, 246, 250, 0.06);
+  --btn-subtle-border: rgba(242, 246, 250, 0.10);
+  --btn-subtle-hover:  rgba(242, 246, 250, 0.10);
 
-  /* ── Typography ─────────────────────────────────────────────── */
+  /* ── Typography Families ────────────────────────────────────── */
   --font-sans:    'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-display: 'Manrope', 'Inter', -apple-system, sans-serif;
   --font-mono:    'JetBrains Mono', 'Cascadia Code', Consolas, monospace;

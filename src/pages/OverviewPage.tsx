@@ -8,7 +8,7 @@ import { ExhaustFanControl } from '../components/wetzone/ExhaustFanControl';
 import { TelemetryChart } from '../components/charts/TelemetryChart';
 import {
   Thermometer, Droplets, UserCheck, UserX, Wind, Power,
-  ArrowRight, Activity, AlertCircle
+  ArrowRight, Activity, AlertCircle, Radio, Clock
 } from 'lucide-react';
 
 const StatCard: React.FC<{
@@ -20,14 +20,14 @@ const StatCard: React.FC<{
   iconColor: string;
   iconBorder: string;
   valueColor?: string;
-  accentTop?: string;
+  accentColor: string;
   delay?: number;
-}> = ({ label, value, sub, icon, iconBg, iconColor, iconBorder, valueColor, accentTop, delay = 0 }) => (
+}> = ({ label, value, sub, icon, iconBg, iconColor, iconBorder, valueColor, accentColor, delay = 0 }) => (
   <div
     className="card-enter"
     style={{
       background: 'var(--surface-card)',
-      border: '1.5px solid var(--border-card)',
+      border: '1px solid var(--border-card)',
       borderRadius: 'var(--radius-lg)',
       boxShadow: 'var(--shadow-card)',
       padding: '18px 18px 16px',
@@ -41,7 +41,7 @@ const StatCard: React.FC<{
     onMouseEnter={e => {
       (e.currentTarget as HTMLDivElement).style.boxShadow = 'var(--shadow-md)';
       (e.currentTarget as HTMLDivElement).style.borderColor = 'var(--border-card-hover)';
-      (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-1px)';
+      (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-2px)';
     }}
     onMouseLeave={e => {
       (e.currentTarget as HTMLDivElement).style.boxShadow = 'var(--shadow-card)';
@@ -50,19 +50,17 @@ const StatCard: React.FC<{
     }}
   >
     {/* Top accent stripe */}
-    {accentTop && (
-      <div style={{
-        position: 'absolute',
-        top: 0, left: 0, right: 0,
-        height: 3,
-        background: accentTop,
-        borderRadius: '18px 18px 0 0',
-      }} />
-    )}
+    <div style={{
+      position: 'absolute',
+      top: 0, left: 0, right: 0,
+      height: 3,
+      background: accentColor,
+      borderRadius: '18px 18px 0 0',
+    }} />
 
     {/* Top row: label + icon */}
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12, marginTop: accentTop ? 4 : 0 }}>
-      <span style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-secondary)', letterSpacing: '0.01em' }}>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12, marginTop: 6 }}>
+      <span style={{ fontSize: '0.76rem', fontWeight: 600, color: 'var(--text-muted)', letterSpacing: '0.02em', textTransform: 'uppercase' }}>
         {label}
       </span>
       <div style={{
@@ -84,7 +82,7 @@ const StatCard: React.FC<{
     {/* Value */}
     <div className="tabular-nums" style={{
       fontFamily: 'var(--font-display)',
-      fontSize: '2.1rem',
+      fontSize: '2.2rem',
       fontWeight: 800,
       color: valueColor || 'var(--text-primary)',
       lineHeight: 1,
@@ -94,28 +92,29 @@ const StatCard: React.FC<{
     </div>
 
     {/* Sub label */}
-    <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: 7, fontWeight: 500 }}>
+    <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: 8, fontWeight: 500 }}>
       {sub}
     </div>
   </div>
 );
 
 export const OverviewPage: React.FC = () => {
-  const { telemetry, connectionState, setActiveNav } = useAirLoop();
+  const { telemetry, connectionState, connectionError, config, isStale, connect, setActiveNav } = useAirLoop();
   const isConnected = connectionState === 'connected';
 
   const temp     = isConnected ? telemetry.comfortTemperatureC : null;
   const humidity = isConnected ? telemetry.comfortHumidityPercent : null;
   const isOccupied  = isConnected && telemetry.occupancyDetected;
-  const fanRunning  = isConnected && telemetry.fanRunningState === 'RUNNING' && telemetry.requestedFanSpeedPercent > 0;
+  const fanPwm      = isConnected ? (telemetry.hardwarePwmPercent ?? telemetry.requestedFanSpeedPercent) : 0;
+  const fanRunning  = isConnected && telemetry.fanRunningState === 'RUNNING' && fanPwm > 0;
   const ventRunning = isConnected && telemetry.exhaustFanState;
 
   const getTempLabel = () => {
-    if (temp === null) return 'Sensor offline';
-    if (temp < 26) return 'Cool';
-    if (temp <= 29) return 'Comfortable';
-    if (temp <= 32) return 'Warm';
-    return 'Hot';
+    if (temp === null) return 'Hardware offline';
+    if (temp < 26) return 'Cool environment';
+    if (temp <= 29) return 'Optimal comfort';
+    if (temp <= 32) return 'Warm environment';
+    return 'Hot environment';
   };
 
   return (
@@ -124,45 +123,72 @@ export const OverviewPage: React.FC = () => {
       {/* ── Offline Banner ──────────────────────────────────────── */}
       {!isConnected && (
         <div style={{
-          background: 'rgba(184, 50, 50, 0.07)',
-          border: '1.5px solid rgba(184, 50, 50, 0.22)',
+          background: 'rgba(248, 113, 113, 0.08)',
+          border: '1px solid rgba(248, 113, 113, 0.25)',
           borderRadius: 'var(--radius-lg)',
-          padding: '14px 20px',
+          padding: '16px 20px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
           flexWrap: 'wrap',
-          gap: 12,
+          gap: 14,
           boxShadow: 'var(--shadow-xs)',
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 11 }}>
-            <AlertCircle size={19} color="var(--color-error)" />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <AlertCircle size={22} color="var(--color-error)" style={{ flexShrink: 0 }} />
             <div>
-              <div style={{ fontWeight: 700, fontSize: '0.92rem', color: 'var(--text-primary)', fontFamily: 'var(--font-display)' }}>
-                Hardware Disconnected
+              <div style={{ fontWeight: 700, fontSize: '0.94rem', color: 'var(--text-primary)', fontFamily: 'var(--font-display)' }}>
+                Hardware Offline
               </div>
               <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: 2 }}>
-                Live sensors and fan controls will activate when your ESP32 connects.
+                {connectionError || `ESP32 is unreachable at ${config.esp32BaseUrl}/api/status. Verify device is connected to Wi-Fi.`}
               </div>
             </div>
           </div>
-          <button
-            onClick={() => setActiveNav('settings')}
-            style={{
-              background: 'rgba(184, 50, 50, 0.10)',
-              border: '1.5px solid rgba(184, 50, 50, 0.28)',
-              color: 'var(--color-error)',
-              borderRadius: 'var(--radius-sm)',
-              padding: '7px 16px',
-              fontSize: '0.82rem',
-              fontWeight: 700,
-              cursor: 'pointer',
-              fontFamily: 'var(--font-sans)',
-              transition: 'all var(--transition-fast)',
-            }}
-          >
-            Configure Device
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <button
+              onClick={connect}
+              className="btn-primary"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                padding: '8px 18px',
+                fontSize: '0.84rem',
+              }}
+            >
+              <Radio size={14} />
+              <span>Connect ESP32</span>
+            </button>
+            <button
+              onClick={() => setActiveNav('settings')}
+              className="btn-secondary"
+              style={{
+                padding: '8px 16px',
+                fontSize: '0.84rem',
+              }}
+            >
+              Configure IP
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── Stale Data Alert ────────────────────────────────────── */}
+      {isConnected && isStale && (
+        <div style={{
+          background: 'rgba(251, 191, 36, 0.08)',
+          border: '1px solid rgba(251, 191, 36, 0.25)',
+          borderRadius: 'var(--radius-lg)',
+          padding: '12px 18px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 10,
+        }}>
+          <Clock size={16} color="var(--color-warning)" />
+          <div style={{ fontSize: '0.80rem', color: 'var(--color-warning)', fontWeight: 600 }}>
+            Telemetry stream delayed — no fresh response received in the last 6 seconds from {config.esp32BaseUrl}.
+          </div>
         </div>
       )}
 
@@ -170,65 +196,67 @@ export const OverviewPage: React.FC = () => {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(175px, 1fr))', gap: 14 }}>
 
         <StatCard
-          label="Temperature"
+          label="Room Temperature"
           value={temp !== null ? `${temp.toFixed(1)}°` : '—'}
           sub={getTempLabel()}
           icon={<Thermometer size={16} />}
           iconBg="var(--accent-primary-dim)"
           iconColor="var(--accent-primary)"
-          iconBorder="rgba(8,127,140,0.22)"
-          accentTop="linear-gradient(90deg, var(--accent-primary), #0AABB8)"
+          iconBorder="rgba(53, 214, 194, 0.25)"
+          valueColor={temp !== null ? 'var(--text-primary)' : undefined}
+          accentColor="linear-gradient(90deg, #35D6C2, #2BB8A6)"
           delay={0.04}
         />
 
         <StatCard
-          label="Humidity"
+          label="Humidity Level"
           value={humidity !== null ? `${humidity}%` : '—'}
-          sub={humidity !== null ? (humidity <= 60 ? 'Optimal level' : 'Elevated moisture') : 'Sensor offline'}
+          sub={humidity !== null ? (humidity <= 60 ? 'Optimal comfort' : 'Elevated moisture') : 'Hardware offline'}
           icon={<Droplets size={16} />}
           iconBg="var(--accent-secondary-bg)"
           iconColor="var(--accent-secondary)"
-          iconBorder="rgba(57,122,101,0.22)"
-          accentTop="linear-gradient(90deg, var(--accent-secondary), #5AAA8A)"
+          iconBorder="rgba(98, 168, 255, 0.25)"
+          valueColor={humidity !== null ? 'var(--text-primary)' : undefined}
+          accentColor="linear-gradient(90deg, #62A8FF, #3B82F6)"
           delay={0.09}
         />
 
         <StatCard
-          label="Occupancy"
-          value={!isConnected ? '—' : isOccupied ? 'Present' : 'Vacant'}
-          sub={isConnected ? (isOccupied ? 'Motion detected' : 'Room is empty') : 'Sensor offline'}
+          label="Room Occupancy"
+          value={!isConnected ? '—' : isOccupied ? 'Occupied' : 'Vacant'}
+          sub={isConnected ? (isOccupied ? 'Motion detected' : 'Room is vacant') : 'Hardware offline'}
           icon={isOccupied ? <UserCheck size={16} /> : <UserX size={16} />}
-          iconBg={!isConnected ? 'var(--bg-tertiary)' : isOccupied ? 'var(--color-success-bg)' : 'var(--bg-tertiary)'}
-          iconColor={!isConnected ? 'var(--text-muted)' : isOccupied ? 'var(--color-success)' : 'var(--text-muted)'}
-          iconBorder={isOccupied ? 'rgba(27,138,90,0.22)' : 'var(--border-medium)'}
-          valueColor={!isConnected ? 'var(--text-muted)' : isOccupied ? 'var(--color-success)' : undefined}
-          accentTop={isOccupied ? 'linear-gradient(90deg, var(--color-success), #5ACA9A)' : undefined}
+          iconBg={!isConnected ? 'var(--surface-2)' : isOccupied ? 'var(--color-success-bg)' : 'var(--color-warning-bg)'}
+          iconColor={!isConnected ? 'var(--text-muted)' : isOccupied ? 'var(--color-success)' : 'var(--color-warning)'}
+          iconBorder={isOccupied ? 'rgba(52, 211, 153, 0.25)' : 'rgba(251, 191, 36, 0.25)'}
+          valueColor={!isConnected ? 'var(--text-muted)' : isOccupied ? 'var(--color-success)' : 'var(--color-warning)'}
+          accentColor="linear-gradient(90deg, #FBBF24, #F59E0B)"
           delay={0.14}
         />
 
         <StatCard
           label="Ceiling Fan"
-          value={!isConnected ? '—' : fanRunning ? `${telemetry.requestedFanSpeedPercent}%` : 'Off'}
-          sub={isConnected ? (telemetry.activeMode === 'auto' ? 'Auto mode active' : 'Manual control') : 'Hardware offline'}
+          value={!isConnected ? '—' : fanRunning ? `${fanPwm}%` : 'Off'}
+          sub={isConnected ? (fanRunning ? `PWM: ${fanPwm}% · Active` : 'Standby / Stopped') : 'Hardware offline'}
           icon={<Wind size={16} />}
-          iconBg={fanRunning ? 'var(--accent-primary-dim)' : 'var(--bg-tertiary)'}
+          iconBg={fanRunning ? 'var(--accent-primary-dim)' : 'var(--surface-2)'}
           iconColor={fanRunning ? 'var(--accent-primary)' : 'var(--text-muted)'}
-          iconBorder={fanRunning ? 'rgba(8,127,140,0.22)' : 'var(--border-medium)'}
+          iconBorder={fanRunning ? 'rgba(53, 214, 194, 0.25)' : 'var(--border-medium)'}
           valueColor={fanRunning ? 'var(--accent-primary)' : undefined}
-          accentTop={fanRunning ? 'linear-gradient(90deg, var(--accent-primary), var(--accent-secondary))' : undefined}
+          accentColor="linear-gradient(90deg, #35D6C2, #2BB8A6)"
           delay={0.19}
         />
 
         <StatCard
-          label="Ventilation"
+          label="Ventilation Fan"
           value={!isConnected ? '—' : ventRunning ? 'Active' : 'Off'}
           sub={isConnected ? (ventRunning ? 'Extracting moisture' : 'Standby') : 'Hardware offline'}
           icon={<Power size={16} />}
-          iconBg={ventRunning ? 'var(--color-warning-bg)' : 'var(--bg-tertiary)'}
-          iconColor={ventRunning ? 'var(--color-warning)' : 'var(--text-muted)'}
-          iconBorder={ventRunning ? 'rgba(181,112,10,0.22)' : 'var(--border-medium)'}
-          valueColor={ventRunning ? 'var(--color-warning)' : undefined}
-          accentTop={ventRunning ? 'linear-gradient(90deg, var(--color-warning), #D4A050)' : undefined}
+          iconBg={ventRunning ? 'var(--accent-secondary-bg)' : 'var(--surface-2)'}
+          iconColor={ventRunning ? 'var(--accent-secondary)' : 'var(--text-muted)'}
+          iconBorder={ventRunning ? 'rgba(98, 168, 255, 0.25)' : 'var(--border-medium)'}
+          valueColor={ventRunning ? 'var(--accent-secondary)' : undefined}
+          accentColor="linear-gradient(90deg, #62A8FF, #3B82F6)"
           delay={0.24}
         />
       </div>
@@ -257,7 +285,7 @@ export const OverviewPage: React.FC = () => {
             width: 260,
             height: 260,
             borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(8,127,140,0.05) 0%, transparent 70%)',
+            background: 'radial-gradient(circle, rgba(53, 214, 194, 0.08) 0%, transparent 70%)',
             pointerEvents: 'none',
           }} />
           <div style={{
@@ -269,7 +297,7 @@ export const OverviewPage: React.FC = () => {
             marginBottom: 18,
             position: 'relative',
           }}>
-            Room Ceiling Fan
+            Ceiling Fan PWM Visualization
           </div>
           <FanVisualization size={230} showLabels={true} />
         </div>
@@ -291,9 +319,9 @@ export const OverviewPage: React.FC = () => {
               <Activity size={17} />
             </div>
             <div>
-              <div className="section-heading">Live Temperature</div>
+              <div className="section-heading">Live Temperature Telemetry</div>
               <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: 2 }}>
-                Real-time stream from ESP32 sensor
+                Real-time HTTP polling stream from ESP32 DHT sensor ({config.esp32BaseUrl}/api/status)
               </div>
             </div>
           </div>
@@ -303,8 +331,8 @@ export const OverviewPage: React.FC = () => {
               display: 'flex',
               alignItems: 'center',
               gap: 5,
-              background: 'var(--bg-secondary)',
-              border: '1.5px solid var(--border-card)',
+              background: 'var(--surface-2)',
+              border: '1px solid var(--border-medium)',
               color: 'var(--accent-primary)',
               borderRadius: 'var(--radius-sm)',
               padding: '7px 14px',
@@ -316,11 +344,11 @@ export const OverviewPage: React.FC = () => {
               boxShadow: 'var(--shadow-xs)',
             }}
             onMouseEnter={e => {
-              (e.currentTarget as HTMLButtonElement).style.background = 'var(--surface-card)';
+              (e.currentTarget as HTMLButtonElement).style.background = 'var(--surface-3)';
               (e.currentTarget as HTMLButtonElement).style.boxShadow = 'var(--shadow-sm)';
             }}
             onMouseLeave={e => {
-              (e.currentTarget as HTMLButtonElement).style.background = 'var(--bg-secondary)';
+              (e.currentTarget as HTMLButtonElement).style.background = 'var(--surface-2)';
               (e.currentTarget as HTMLButtonElement).style.boxShadow = 'var(--shadow-xs)';
             }}
           >

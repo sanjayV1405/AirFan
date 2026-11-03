@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { TelemetryData, DeviceConfig, ConnectionState, CommandStatus } from '../types/telemetry';
-import { ESP32Client } from '../services/esp32Client';
+import { ESP32Client, normalizeEsp32Url } from '../services/esp32Client';
 import { ConfigService } from '../services/configService';
 import { historyService } from '../services/historyService';
 
@@ -10,6 +10,7 @@ export interface AirLoopContextType {
   connectionState: ConnectionState;
   isStale: boolean;
   isPolling: boolean;
+  connectionError: string | null;
   lastSuccessfulUpdate: number | null;
   pingLatency: number | null;
   commandPending: boolean;
@@ -17,12 +18,16 @@ export interface AirLoopContextType {
   activeNav: string;
   setActiveNav: (nav: string) => void;
 
-  // Actions
+  // Connection Actions
+  connect: () => Promise<void>;
+  disconnect: () => void;
+  reconnect: () => Promise<void>;
+  pingDevice: () => Promise<{ ok: boolean; latencyMs: number; error?: string; data?: any }>;
+
+  // Control Actions
   setOperatingMode: (mode: 'manual' | 'auto') => Promise<boolean>;
   setFanSpeed: (speedPercent: number) => Promise<boolean>;
   setExhaustFan: (enabled: boolean) => Promise<boolean>;
-  reconnect: () => Promise<void>;
-  pingDevice: () => Promise<{ ok: boolean; latencyMs: number; error?: string }>;
   updateConfig: (newConfig: Partial<DeviceConfig>) => void;
   saveConfigToDevice: () => Promise<boolean>;
 }
@@ -30,7 +35,7 @@ export interface AirLoopContextType {
 const INITIAL_TELEMETRY: TelemetryData = {
   deviceId: 'ESP32-AIRLOOP',
   timestamp: Date.now(),
-  connectionState: 'connecting',
+  connectionState: 'offline',
   activeMode: 'auto',
   comfortTemperatureC: null,
   comfortHumidityPercent: null,
@@ -47,11 +52,11 @@ const INITIAL_TELEMETRY: TelemetryData = {
   exhaustFanState: false,
   exhaustFanRuntimeSeconds: 0,
   activeTemperatureBand: 'COOL',
-  controllerReason: 'Waiting for hardware connection...',
+  controllerReason: 'Hardware Offline — Click Connect ESP32 to begin',
   sensorHealth: {
     comfortDht11: 'DISCONNECTED',
     wetDht11: 'DISCONNECTED',
-    pirMotion: 'DISCONNECTED',
+    pirMotion: 'OK',
     fanMosfet: 'OK',
     exhaustMosfet: 'OK',
   },
@@ -66,11 +71,11 @@ export const AirLoopProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [config, setConfig] = useState<DeviceConfig>(() => ConfigService.load());
   const [activeNav, setActiveNav] = useState<string>('overview');
 
-  // Set light theme globally
+  // Set dark theme globally
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', 'light');
-    document.documentElement.classList.remove('dark');
-    document.documentElement.classList.add('light');
+    document.documentElement.setAttribute('data-theme', 'dark');
+    document.documentElement.classList.remove('light');
+    document.documentElement.classList.add('dark');
   }, []);
 
   // Real ESP32 HTTP Client
@@ -79,19 +84,24 @@ export const AirLoopProvider: React.FC<{ children: React.ReactNode }> = ({ child
     [config.esp32BaseUrl, config.connectionTimeoutMs]
   );
 
-  // Live telemetry state (starts with unavailable values until real hardware responds)
+  // Live telemetry state (starts offline until real hardware connects)
   const [telemetry, setTelemetry] = useState<TelemetryData>(INITIAL_TELEMETRY);
-  const [connectionState, setConnectionState] = useState<ConnectionState>('connecting');
+  const [connectionState, setConnectionState] = useState<ConnectionState>('offline');
+  const [connectionError, setConnectionError] = useState<string | null>(null);
   const [lastSuccessfulUpdate, setLastSuccessfulUpdate] = useState<number | null>(null);
   const lastSuccessfulUpdateRef = useRef<number | null>(null);
   const [pingLatency, setPingLatency] = useState<number | null>(null);
-  const [isPolling] = useState<boolean>(true);
+  const [isPolling, setIsPolling] = useState<boolean>(true);
   const [isStale, setIsStale] = useState<boolean>(false);
   const [commandPending, setCommandPending] = useState<boolean>(false);
   const [lastCommandFeedback, setLastCommandFeedback] = useState<{ id: string; status: CommandStatus; message: string } | null>(null);
 
   const prevTelemetryRef = useRef<TelemetryData>(telemetry);
   const consecutiveFailuresRef = useRef<number>(0);
+  const isPollingRef = useRef<boolean>(isPolling);
+  useEffect(() => {
+    isPollingRef.current = isPolling;
+  }, [isPolling]);
 
   // Sync client parameters with config changes
   useEffect(() => {
@@ -110,115 +120,204 @@ export const AirLoopProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setLastSuccessfulUpdate(now);
     setIsStale(false);
     consecutiveFailuresRef.current = 0;
+    setConnectionError(null);
 
-    // Log real hardware state transitions
+    // Log hardware connection event
     if (prev.connectionState !== 'connected' && data.connectionState === 'connected') {
       historyService.logEvent(
         'system',
         'HARDWARE_CONNECTED',
-        'Hardware Connected',
-        `Live ESP32 telemetry feed established at ${config.esp32BaseUrl}.`,
+        'ESP32 Connected',
+        `Live telemetry established with ${config.esp32BaseUrl} (/api/status).`,
         'DEVICE',
         'success'
       );
     }
 
-    if (prev.activeMode !== data.activeMode) {
-      historyService.logEvent(
-        'command',
-        'MODE_CHANGED',
-        `Mode Changed to ${data.activeMode === 'auto' ? 'Automatic' : 'Manual'}`,
-        `Room fan regulation set to ${data.activeMode === 'auto' ? 'Automatic' : 'Manual'}.`,
-        'DEVICE',
-        'info'
-      );
-    }
-
-    if (prev.exhaustFanState !== data.exhaustFanState) {
-      historyService.logEvent(
-        'ventilation',
-        data.exhaustFanState ? 'VENTILATION_START' : 'VENTILATION_STOP',
-        `Ventilation Fan ${data.exhaustFanState ? 'Started' : 'Stopped'}`,
-        data.exhaustFanState 
-          ? `Ventilation activated (Humidity: ${data.wetZoneHumidityPercent ?? '--'}%).`
-          : 'Ventilation stopped. Humidity within target range.',
-        'DEVICE',
-        data.exhaustFanState ? 'warning' : 'info'
-      );
-    }
-
-    if (prev.occupancyDetected !== data.occupancyDetected) {
-      historyService.logEvent(
-        'sensor',
-        data.occupancyDetected ? 'ROOM_OCCUPIED' : 'ROOM_EMPTY',
-        data.occupancyDetected ? 'Motion Detected' : 'Room Vacated',
-        data.occupancyDetected ? 'Occupancy sensor detected presence.' : 'No motion detected.',
-        'DEVICE',
-        'info'
-      );
+    // Log fan state changes
+    if (prev.fanRunningState !== data.fanRunningState || prev.hardwarePwmPercent !== data.hardwarePwmPercent) {
+      if (data.fanRunningState === 'RUNNING') {
+        historyService.logEvent(
+          'command',
+          'FAN_ACTIVE',
+          `Ceiling Fan Running at ${data.hardwarePwmPercent ?? 0}% PWM`,
+          `Hardware reported fan active. Output duty: ${data.hardwarePwmPercent ?? 0}%.`,
+          'DEVICE',
+          'info'
+        );
+      } else if (prev.fanRunningState === 'RUNNING') {
+        historyService.logEvent(
+          'command',
+          'FAN_STOPPED',
+          'Ceiling Fan Idle',
+          'Hardware reported fan speed 0% PWM.',
+          'DEVICE',
+          'info'
+        );
+      }
     }
 
     // Add point to chart history
     historyService.addTelemetrySample(data);
   }, [config.esp32BaseUrl]);
 
-  // Main Polling Loop — Strictly Real Hardware
+  // Single poll tick logic
+  const executePollTick = useCallback(async () => {
+    if (!isPollingRef.current) return;
+
+    try {
+      const liveData = await esp32Client.getTelemetry();
+      if (isPollingRef.current) {
+        setConnectionState('connected');
+        handleNewTelemetry(liveData);
+      }
+    } catch (err: any) {
+      if (isPollingRef.current) {
+        consecutiveFailuresRef.current += 1;
+        // Require 2 consecutive failures to avoid flapping on transient network hiccups
+        if (consecutiveFailuresRef.current >= 2) {
+          setConnectionState('offline');
+          setIsStale(true);
+          setConnectionError(err.message || `Cannot connect to ${config.esp32BaseUrl}`);
+          setTelemetry(prev => ({
+            ...prev,
+            connectionState: 'offline',
+            comfortTemperatureC: null,
+            comfortHumidityPercent: null,
+            wetZoneTemperatureC: null,
+            wetZoneHumidityPercent: null,
+            fanRunningState: 'OFF',
+            requestedFanSpeedPercent: 0,
+            hardwarePwmPercent: null,
+            exhaustFanState: false,
+            controllerReason: `Hardware offline: ${err.message || 'Check ESP32 Wi-Fi and IP address.'}`
+          }));
+        }
+      }
+    }
+  }, [config.esp32BaseUrl, esp32Client, handleNewTelemetry]);
+
+  // Main Polling Loop — Runs every pollingIntervalMs (default 2s) when isPolling is true
   useEffect(() => {
     if (!isPolling) return;
 
     let isSubscribed = true;
 
-    const pollTick = async () => {
-      try {
-        const liveData = await esp32Client.getTelemetry();
-        if (isSubscribed) {
-          setConnectionState('connected');
-          handleNewTelemetry(liveData);
-        }
-      } catch {
-        if (isSubscribed) {
-          consecutiveFailuresRef.current += 1;
-          if (consecutiveFailuresRef.current >= 2) {
-            setConnectionState('offline');
-            setIsStale(true);
-            setTelemetry(prev => ({
-              ...prev,
-              connectionState: 'offline',
-              comfortTemperatureC: null,
-              comfortHumidityPercent: null,
-              wetZoneTemperatureC: null,
-              wetZoneHumidityPercent: null,
-              fanRunningState: 'OFF',
-              requestedFanSpeedPercent: 0,
-              hardwarePwmPercent: null,
-              exhaustFanState: false,
-              controllerReason: 'Hardware disconnected. Waiting for connection...'
-            }));
-          }
-        }
+    // Run first poll tick immediately
+    executePollTick();
+
+    // Setup 2-second recurring interval
+    const interval = setInterval(() => {
+      if (isSubscribed && isPollingRef.current) {
+        executePollTick();
       }
-    };
+    }, Math.max(1000, config.pollingIntervalMs || 2000));
 
-    // Immediate first tick
-    pollTick();
-    const interval = setInterval(pollTick, config.pollingIntervalMs);
-
-    // Stale data watchdog (checks if updates stopped coming)
+    // Stale data watchdog (checks if updates stopped coming for > 6 seconds)
     const watchdog = setInterval(() => {
-      if (lastSuccessfulUpdateRef.current) {
+      if (isSubscribed && lastSuccessfulUpdateRef.current && isPollingRef.current) {
         const elapsed = Date.now() - lastSuccessfulUpdateRef.current;
-        if (elapsed > 7000) {
+        if (elapsed > 6000) {
           setIsStale(true);
         }
       }
-    }, 2500);
+    }, 2000);
 
     return () => {
       isSubscribed = false;
       clearInterval(interval);
       clearInterval(watchdog);
     };
-  }, [config.pollingIntervalMs, esp32Client, handleNewTelemetry, isPolling]);
+  }, [config.pollingIntervalMs, executePollTick, isPolling]);
+
+  // Connect to ESP32: activates polling, sets connecting state, attempts immediate poll
+  const connect = useCallback(async () => {
+    setIsPolling(true);
+    isPollingRef.current = true;
+    setConnectionState('connecting');
+    setConnectionError(null);
+    consecutiveFailuresRef.current = 0;
+
+    historyService.logEvent(
+      'system',
+      'CONNECT_ATTEMPT',
+      'Connecting to ESP32',
+      `Querying ${config.esp32BaseUrl}/api/status...`,
+      'FRONTEND',
+      'info'
+    );
+
+    try {
+      const pingRes = await esp32Client.ping();
+      setPingLatency(pingRes.latencyMs);
+
+      if (pingRes.ok) {
+        const liveData = await esp32Client.getTelemetry();
+        setConnectionState('connected');
+        handleNewTelemetry(liveData);
+      } else {
+        setConnectionState('offline');
+        setConnectionError(pingRes.error || `ESP32 not responding at ${config.esp32BaseUrl}`);
+        historyService.logEvent(
+          'system',
+          'CONNECT_FAILED',
+          'Connection Failed',
+          pingRes.error || `Could not reach ${config.esp32BaseUrl}. Verify device is powered and on the same Wi-Fi.`,
+          'FRONTEND',
+          'error'
+        );
+      }
+    } catch (err: any) {
+      setConnectionState('offline');
+      setConnectionError(err.message || 'Network error connecting to ESP32.');
+      historyService.logEvent(
+        'system',
+        'CONNECT_FAILED',
+        'Connection Failed',
+        err.message || 'Network error connecting to ESP32.',
+        'FRONTEND',
+        'error'
+      );
+    }
+  }, [config.esp32BaseUrl, esp32Client, handleNewTelemetry]);
+
+  // Disconnect from ESP32: stops polling, cleans up state, marks offline
+  const disconnect = useCallback(() => {
+    setIsPolling(false);
+    isPollingRef.current = false;
+    setConnectionState('offline');
+    setConnectionError(null);
+    setIsStale(false);
+    lastSuccessfulUpdateRef.current = null;
+    setLastSuccessfulUpdate(null);
+    setPingLatency(null);
+
+    setTelemetry({
+      ...INITIAL_TELEMETRY,
+      timestamp: Date.now(),
+      connectionState: 'offline',
+      controllerReason: 'Hardware disconnected by user.'
+    });
+
+    historyService.logEvent(
+      'system',
+      'HARDWARE_DISCONNECTED',
+      'ESP32 Disconnected',
+      'Live polling stopped. Hardware disconnected.',
+      'FRONTEND',
+      'info'
+    );
+  }, []);
+
+  const reconnect = useCallback(async () => {
+    await connect();
+  }, [connect]);
+
+  const pingDevice = useCallback(async () => {
+    const res = await esp32Client.ping();
+    setPingLatency(res.latencyMs);
+    return res;
+  }, [esp32Client]);
 
   // Real Hardware Commands
   const setOperatingMode = async (mode: 'manual' | 'auto'): Promise<boolean> => {
@@ -226,21 +325,12 @@ export const AirLoopProvider: React.FC<{ children: React.ReactNode }> = ({ child
       setLastCommandFeedback({
         id: `err_${Date.now()}`,
         status: 'ERROR',
-        message: 'Cannot change mode: Hardware is disconnected.'
+        message: 'Cannot change mode: Hardware is offline.'
       });
       return false;
     }
 
     setCommandPending(true);
-    historyService.logEvent(
-      'command',
-      'MODE_REQUEST',
-      `Switching to ${mode === 'auto' ? 'Automatic' : 'Manual'} Mode`,
-      `Requesting hardware switch to ${mode} mode...`,
-      'FRONTEND',
-      'info'
-    );
-
     const res = await esp32Client.setMode(mode);
     setCommandPending(false);
     setLastCommandFeedback({
@@ -266,22 +356,13 @@ export const AirLoopProvider: React.FC<{ children: React.ReactNode }> = ({ child
       setLastCommandFeedback({
         id: `err_${Date.now()}`,
         status: 'ERROR',
-        message: 'Cannot adjust fan: Hardware is disconnected.'
+        message: 'Cannot adjust fan: Hardware is offline.'
       });
       return false;
     }
 
     setCommandPending(true);
     const safe = Math.max(0, Math.min(100, Math.round(speedPercent)));
-    historyService.logEvent(
-      'command',
-      'SPEED_REQUEST',
-      `Setting Room Fan Speed to ${safe}%`,
-      `Sending speed command ${safe}% to hardware...`,
-      'FRONTEND',
-      'info'
-    );
-
     const res = await esp32Client.setFanSpeed(safe);
     setCommandPending(false);
     setLastCommandFeedback({
@@ -307,21 +388,12 @@ export const AirLoopProvider: React.FC<{ children: React.ReactNode }> = ({ child
       setLastCommandFeedback({
         id: `err_${Date.now()}`,
         status: 'ERROR',
-        message: 'Cannot control ventilation: Hardware is disconnected.'
+        message: 'Cannot control ventilation: Hardware is offline.'
       });
       return false;
     }
 
     setCommandPending(true);
-    historyService.logEvent(
-      'command',
-      'EXHAUST_REQUEST',
-      `Turning Ventilation ${enabled ? 'On' : 'Off'}`,
-      `Sending ventilation command to hardware...`,
-      'FRONTEND',
-      'info'
-    );
-
     const res = await esp32Client.setExhaustFan(enabled);
     setCommandPending(false);
     setLastCommandFeedback({
@@ -342,44 +414,12 @@ export const AirLoopProvider: React.FC<{ children: React.ReactNode }> = ({ child
     return res.success;
   };
 
-  const reconnect = async () => {
-    setConnectionState('connecting');
-    const pingRes = await esp32Client.ping();
-    setPingLatency(pingRes.latencyMs);
-    if (pingRes.ok) {
-      setConnectionState('connected');
-      historyService.logEvent(
-        'system',
-        'DEVICE_RECONNECTED',
-        'Hardware Reconnected',
-        `ESP32 responsive at ${config.esp32BaseUrl} (${pingRes.latencyMs}ms).`,
-        'DEVICE',
-        'success'
-      );
-    } else {
-      setConnectionState('offline');
-      historyService.logEvent(
-        'system',
-        'RECONNECT_FAILED',
-        'Connection Failed',
-        pingRes.error || 'Hardware unreachable. Check IP and Wi-Fi.',
-        'FRONTEND',
-        'error'
-      );
-    }
-  };
-
-  const pingDevice = async () => {
-    const res = await esp32Client.ping();
-    setPingLatency(res.latencyMs);
-    return res;
-  };
-
   const updateConfig = (newConfig: Partial<DeviceConfig>) => {
-    const merged = { ...config, ...newConfig };
+    const normalizedUrl = newConfig.esp32BaseUrl ? normalizeEsp32Url(newConfig.esp32BaseUrl) : config.esp32BaseUrl;
+    const merged = { ...config, ...newConfig, esp32BaseUrl: normalizedUrl };
     setConfig(merged);
     ConfigService.save(merged);
-    historyService.logEvent('system', 'CONFIG_UPDATED', 'Settings Saved', 'Local settings updated.', 'FRONTEND', 'info');
+    historyService.logEvent('system', 'CONFIG_UPDATED', 'Settings Saved', 'Configuration updated.', 'FRONTEND', 'info');
   };
 
   const saveConfigToDevice = async (): Promise<boolean> => {
@@ -387,7 +427,7 @@ export const AirLoopProvider: React.FC<{ children: React.ReactNode }> = ({ child
       setLastCommandFeedback({
         id: `err_${Date.now()}`,
         status: 'ERROR',
-        message: 'Cannot sync settings: Hardware is disconnected.'
+        message: 'Cannot sync settings: Hardware is offline.'
       });
       return false;
     }
@@ -414,17 +454,20 @@ export const AirLoopProvider: React.FC<{ children: React.ReactNode }> = ({ child
         connectionState,
         isStale,
         isPolling,
+        connectionError,
         lastSuccessfulUpdate,
         pingLatency,
         commandPending,
         lastCommandFeedback,
         activeNav,
         setActiveNav,
+        connect,
+        disconnect,
+        reconnect,
+        pingDevice,
         setOperatingMode,
         setFanSpeed,
         setExhaustFan,
-        reconnect,
-        pingDevice,
         updateConfig,
         saveConfigToDevice
       }}

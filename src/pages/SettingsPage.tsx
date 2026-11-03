@@ -1,17 +1,20 @@
 import React, { useState } from 'react';
 import { useAirLoop } from '../context/AirLoopContext';
 import { ConfigService } from '../services/configService';
+import { normalizeEsp32Url } from '../services/esp32Client';
 import { DeviceConfig } from '../types/telemetry';
 import { 
   Settings, 
   Wifi, 
+  WifiOff,
   Sliders, 
   Check, 
   Save, 
   Radio, 
   RefreshCw,
   Clock,
-  Code
+  Code,
+  Info
 } from 'lucide-react';
 
 export const SettingsPage: React.FC = () => {
@@ -20,15 +23,19 @@ export const SettingsPage: React.FC = () => {
     updateConfig, 
     saveConfigToDevice, 
     pingDevice, 
+    connect,
+    disconnect,
     commandPending,
-    connectionState
+    connectionState,
+    connectionError
   } = useAirLoop();
 
   const isConnected = connectionState === 'connected';
+  const isConnecting = connectionState === 'connecting';
 
-  const [activeTab, setActiveTab] = useState<'preferences' | 'connection' | 'diagnostics'>('preferences');
+  const [activeTab, setActiveTab] = useState<'preferences' | 'connection' | 'diagnostics'>('connection');
   const [form, setForm] = useState<DeviceConfig>({ ...config });
-  const [pingResult, setPingResult] = useState<{ ok: boolean; latencyMs: number; error?: string } | null>(null);
+  const [pingResult, setPingResult] = useState<{ ok: boolean; latencyMs: number; error?: string; data?: any } | null>(null);
   const [isPinging, setIsPinging] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
@@ -41,6 +48,15 @@ export const SettingsPage: React.FC = () => {
     setIsPinging(false);
   };
 
+  const handleConnectToggle = async () => {
+    if (isConnected || isConnecting) {
+      disconnect();
+    } else {
+      updateConfig({ esp32BaseUrl: normalizeEsp32Url(form.esp32BaseUrl) });
+      await connect();
+    }
+  };
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaveSuccessMsg(null);
@@ -51,10 +67,12 @@ export const SettingsPage: React.FC = () => {
     }
     setValidationErrors([]);
     setIsSaving(true);
-    updateConfig(form);
+    const normalized = { ...form, esp32BaseUrl: normalizeEsp32Url(form.esp32BaseUrl) };
+    setForm(normalized);
+    updateConfig(normalized);
     if (isConnected) await saveConfigToDevice();
     setIsSaving(false);
-    setSaveSuccessMsg('Settings saved successfully.');
+    setSaveSuccessMsg('Configuration saved and applied.');
     setTimeout(() => setSaveSuccessMsg(null), 3500);
   };
 
@@ -63,7 +81,7 @@ export const SettingsPage: React.FC = () => {
     padding: '10px 14px',
     fontSize: '0.90rem',
     borderRadius: 'var(--radius-sm)',
-    border: '1.5px solid var(--border-card)',
+    border: '1px solid var(--border-medium)',
     background: 'var(--surface-input)',
     color: 'var(--text-primary)',
     fontFamily: 'var(--font-sans)',
@@ -72,19 +90,21 @@ export const SettingsPage: React.FC = () => {
   };
 
   const TABS = [
-    { id: 'preferences', label: 'Preferences', icon: Sliders },
-    { id: 'connection', label: 'Connection', icon: Wifi },
-    { id: 'diagnostics', label: 'Diagnostics', icon: Code },
+    { id: 'connection', label: 'ESP32 Wi-Fi Connection', icon: Wifi },
+    { id: 'preferences', label: 'Comfort Preferences', icon: Sliders },
+    { id: 'diagnostics', label: 'Hardware Architecture', icon: Code },
   ] as const;
 
   const diagItems = [
-    { label: 'Room Temperature Input', value: 'GPIO 4 — DHT11 1-Wire Single Bus' },
-    { label: 'Wet Zone Moisture Input', value: 'GPIO 5 — DHT11 1-Wire Single Bus' },
-    { label: 'Motion Detection Input', value: 'GPIO 27 — HC-SR501 PIR Interrupt' },
-    { label: 'Ceiling Fan Output', value: 'GPIO 25 — IRLZ44N 25kHz LEDC PWM' },
-    { label: 'Exhaust Fan Output', value: 'GPIO 26 — Opto-Isolated Digital Relay' },
-    { label: 'Telemetry Polling', value: `Every ${form.pollingIntervalMs}ms` },
+    { label: 'Room Sensor Input', value: 'GPIO 4 — DHT22 Temperature & Humidity (1-Wire)' },
+    { label: 'Ceiling Fan PWM Output', value: 'GPIO 25 — Motor Driver PWM (25kHz LEDC)' },
+    { label: 'Wi-Fi HTTP Endpoint', value: `${normalizeEsp32Url(form.esp32BaseUrl)}/api/status` },
+    { label: 'Telemetry Polling Rate', value: 'Every 2000ms (2 seconds)' },
+    { label: 'Firmware Communication', value: 'Local Wi-Fi REST API (GET /api/status)' },
+    { label: 'Serial Baud Rate', value: '115200 baud' },
   ];
+
+  const resolvedEndpoint = `${normalizeEsp32Url(form.esp32BaseUrl)}/api/status`;
 
   return (
     <div className="fade-in-up" style={{ display: 'flex', flexDirection: 'column', gap: 20, maxWidth: 900, margin: '0 auto' }}>
@@ -96,8 +116,8 @@ export const SettingsPage: React.FC = () => {
             <Settings size={18} />
           </div>
           <div>
-            <h1 className="page-title">Settings</h1>
-            <p className="page-subtitle">Comfort thresholds, hardware connection, and device diagnostics</p>
+            <h1 className="page-title">Device Settings</h1>
+            <p className="page-subtitle">ESP32 local Wi-Fi connection, comfort thresholds, and hardware diagnostics</p>
           </div>
         </div>
       </div>
@@ -106,10 +126,10 @@ export const SettingsPage: React.FC = () => {
       <div style={{
         display: 'flex',
         gap: 4,
-        background: 'var(--bg-secondary)',
+        background: 'var(--surface-2)',
         padding: '4px',
         borderRadius: 'var(--radius-md)',
-        border: '1.5px solid var(--border-card)',
+        border: '1px solid var(--border-medium)',
         width: 'fit-content',
       }}>
         {TABS.map(({ id, label, icon: Icon }) => {
@@ -130,7 +150,7 @@ export const SettingsPage: React.FC = () => {
                 borderRadius: 'calc(var(--radius-md) - 3px)',
                 padding: '8px 16px',
                 fontSize: '0.82rem',
-                fontWeight: isActive ? 600 : 500,
+                fontWeight: isActive ? 700 : 500,
                 cursor: 'pointer',
                 transition: 'all var(--transition-fast)',
                 fontFamily: 'var(--font-sans)',
@@ -149,7 +169,7 @@ export const SettingsPage: React.FC = () => {
         {validationErrors.length > 0 && (
           <div style={{
             background: 'var(--color-error-bg)',
-            border: '1px solid rgba(192, 57, 43, 0.25)',
+            border: '1px solid rgba(248, 113, 113, 0.25)',
             borderRadius: 'var(--radius-md)',
             padding: '14px 18px',
             color: 'var(--color-error)',
@@ -164,7 +184,7 @@ export const SettingsPage: React.FC = () => {
         {saveSuccessMsg && (
           <div style={{
             background: 'var(--color-success-bg)',
-            border: '1px solid rgba(26, 158, 106, 0.25)',
+            border: '1px solid rgba(52, 211, 153, 0.25)',
             borderRadius: 'var(--radius-md)',
             padding: '14px 18px',
             color: 'var(--color-success)',
@@ -178,16 +198,222 @@ export const SettingsPage: React.FC = () => {
           </div>
         )}
 
-        {/* ── Tab 1: Comfort & Preferences ────────────────────── */}
+        {/* ── Tab 1: Device Connection ─────────────────────────── */}
+        {activeTab === 'connection' && (
+          <div className="card-solid" style={{ padding: '24px', borderRadius: 'var(--radius-lg)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, flexWrap: 'wrap', gap: 10 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Wifi size={18} color="var(--accent-primary)" />
+                <h3 className="section-heading">ESP32 Wi-Fi HTTP Configuration</h3>
+              </div>
+
+              {/* Status Pill */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                {isConnected ? (
+                  <span className="badge badge-success" style={{ fontSize: '0.74rem', padding: '4px 12px' }}>
+                    <span className="live-indicator" style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: 'var(--color-success)', display: 'inline-block' }} />
+                    Connected
+                  </span>
+                ) : isConnecting ? (
+                  <span className="badge badge-teal" style={{ fontSize: '0.74rem', padding: '4px 12px' }}>
+                    <RefreshCw size={11} className="spin" />
+                    Connecting…
+                  </span>
+                ) : (
+                  <span className="badge badge-error" style={{ fontSize: '0.74rem', padding: '4px 12px' }}>
+                    <WifiOff size={11} />
+                    Hardware Offline
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <p style={{ fontSize: '0.80rem', color: 'var(--text-secondary)', marginBottom: 20, lineHeight: 1.55 }}>
+              Enter your ESP32's local network IP address. The website fetches live sensor readings and fan PWM duty every 2 seconds via <code style={{ color: 'var(--accent-primary)', background: 'var(--surface-2)', padding: '2px 6px', borderRadius: 4 }}>GET /api/status</code>.
+            </p>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 18, marginBottom: 18 }}>
+              <div>
+                <label style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', display: 'block', marginBottom: 6, fontWeight: 600 }}>
+                  Device Name
+                </label>
+                <input
+                  type="text"
+                  value={form.deviceName}
+                  onChange={e => setForm({ ...form, deviceName: e.target.value })}
+                  style={inputStyle}
+                  placeholder="AirLoop ESP32"
+                />
+              </div>
+
+              <div>
+                <label style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', display: 'block', marginBottom: 6, fontWeight: 600 }}>
+                  ESP32 IP Address or Hostname
+                </label>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <input
+                    type="text"
+                    value={form.esp32BaseUrl}
+                    onChange={e => setForm({ ...form, esp32BaseUrl: e.target.value })}
+                    placeholder="192.168.1.50 or http://192.168.1.50"
+                    style={{ ...inputStyle, flex: 1, fontVariantNumeric: 'tabular-nums' }}
+                  />
+                  <button
+                    type="button"
+                    onClick={handlePing}
+                    disabled={isPinging}
+                    className="btn-secondary"
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 6,
+                      padding: '9px 16px',
+                      fontSize: '0.82rem',
+                      borderRadius: 'var(--radius-sm)',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {isPinging ? <RefreshCw size={14} className="spin" /> : <Radio size={14} />}
+                    <span>Test Ping</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Resolved URL banner */}
+            <div style={{
+              background: 'var(--surface-2)',
+              border: '1px solid var(--border-medium)',
+              borderRadius: 'var(--radius-sm)',
+              padding: '12px 16px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: 10,
+              marginBottom: 18,
+            }}>
+              <div>
+                <span style={{ fontSize: '0.70rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 600 }}>
+                  Active API Endpoint
+                </span>
+                <div style={{ fontSize: '0.86rem', color: 'var(--accent-primary)', fontFamily: 'var(--font-mono)', marginTop: 2 }}>
+                  GET {resolvedEndpoint}
+                </div>
+              </div>
+
+              {/* Connect / Disconnect button */}
+              <button
+                type="button"
+                onClick={handleConnectToggle}
+                className={isConnected ? 'btn-secondary' : 'btn-primary'}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  padding: '8px 18px',
+                  fontSize: '0.82rem',
+                  borderRadius: 'var(--radius-sm)',
+                }}
+              >
+                {isConnected ? (
+                  <>
+                    <WifiOff size={14} />
+                    <span>Disconnect</span>
+                  </>
+                ) : (
+                  <>
+                    <Radio size={14} />
+                    <span>{isConnecting ? 'Connecting…' : 'Connect ESP32'}</span>
+                  </>
+                )}
+              </button>
+            </div>
+
+            {/* Connection error feedback */}
+            {connectionError && (
+              <div style={{
+                marginBottom: 16,
+                padding: '12px 16px',
+                borderRadius: 'var(--radius-sm)',
+                background: 'var(--color-error-bg)',
+                border: '1px solid rgba(248, 113, 113, 0.25)',
+                fontSize: '0.82rem',
+                color: 'var(--color-error)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+              }}>
+                <WifiOff size={15} style={{ flexShrink: 0 }} />
+                <span>{connectionError}</span>
+              </div>
+            )}
+
+            {/* Ping Result Feedback */}
+            {pingResult && (
+              <div style={{
+                marginBottom: 16,
+                padding: '12px 16px',
+                borderRadius: 'var(--radius-sm)',
+                background: pingResult.ok ? 'var(--color-success-bg)' : 'var(--color-error-bg)',
+                border: `1px solid ${pingResult.ok ? 'rgba(52, 211, 153, 0.25)' : 'rgba(248, 113, 113, 0.25)'}`,
+                fontSize: '0.82rem',
+                color: pingResult.ok ? 'var(--color-success)' : 'var(--color-error)',
+                fontWeight: 600,
+              }}>
+                {pingResult.ok 
+                  ? `✓ ESP32 responsive (${pingResult.latencyMs}ms roundtrip). Valid JSON returned from /api/status.` 
+                  : `✗ Connection test failed: ${pingResult.error || 'Device unreachable. Check Wi-Fi and IP.'}`}
+              </div>
+            )}
+
+            {/* Expected JSON Schema format */}
+            <div style={{
+              background: 'var(--surface-input)',
+              border: '1px solid var(--border-subtle)',
+              borderRadius: 'var(--radius-md)',
+              padding: '16px',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8, color: 'var(--text-secondary)', fontSize: '0.78rem', fontWeight: 600 }}>
+                <Info size={14} color="var(--accent-primary)" />
+                <span>ESP32 Arduino Firmware Status API Specification:</span>
+              </div>
+              <pre style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: '0.78rem',
+                color: 'var(--text-secondary)',
+                lineHeight: 1.5,
+                margin: 0,
+                overflowX: 'auto',
+              }}>
+{`{
+  "temperature": 29.3,
+  "humidity": 52.0,
+  "fanPWM": 100,
+  "fanState": "ON",
+  "sensorStatus": "OK",
+  "connected": true
+}`}
+              </pre>
+              <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: 8 }}>
+                • <strong>fanPWM</strong>: 0 to 100 (or 0-255). 0 stops the fan; greater than 0 animates the visualizer.<br/>
+                • <strong>temperature / humidity</strong>: Read from DHT22 (GPIO 4) on ESP32.<br/>
+                • <strong>Wi-Fi</strong>: The laptop running the dashboard and the ESP32 must be on the same local network.
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── Tab 2: Comfort & Preferences ────────────────────── */}
         {activeTab === 'preferences' && (
           <>
             <div className="card-solid" style={{ padding: '22px', borderRadius: 'var(--radius-lg)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
                 <Sliders size={17} color="var(--accent-primary)" />
-                <h3 className="section-heading">Comfort Temperature Boundaries</h3>
+                <h3 className="section-heading">Automatic Fan Temperature Boundaries</h3>
               </div>
               <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: 18 }}>
-                Temperature thresholds that trigger automatic fan speed changes.
+                Temperature thresholds configured for automatic fan speed regulation.
               </p>
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
@@ -216,123 +442,48 @@ export const SettingsPage: React.FC = () => {
             <div className="card-solid" style={{ padding: '22px', borderRadius: 'var(--radius-lg)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
                 <Clock size={17} color="var(--accent-primary)" />
-                <h3 className="section-heading">Occupancy & Power-Saving</h3>
+                <h3 className="section-heading">Telemetry Polling Rate</h3>
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
                 <div>
                   <label style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', display: 'block', marginBottom: 6, fontWeight: 600 }}>
-                    Vacancy Timer (minutes)
+                    Polling Interval (ms)
                   </label>
                   <input
                     type="number"
-                    min="1"
-                    max="60"
-                    value={form.occupancyTimeoutMinutes}
-                    onChange={e => setForm({ ...form, occupancyTimeoutMinutes: Number(e.target.value) })}
+                    min="1000"
+                    max="10000"
+                    step="500"
+                    value={form.pollingIntervalMs}
+                    onChange={e => setForm({ ...form, pollingIntervalMs: Number(e.target.value) })}
                     style={inputStyle}
                   />
                   <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', marginTop: 4 }}>
-                    Time before power-saving mode activates
+                    Standard polling frequency (2000ms recommended)
                   </div>
                 </div>
 
                 <div>
                   <label style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', display: 'block', marginBottom: 6, fontWeight: 600 }}>
-                    Empty Room Fan Speed (%)
+                    Request Timeout (ms)
                   </label>
                   <input
                     type="number"
-                    min="0"
-                    max="100"
-                    value={form.emptyRoomSpeed}
-                    onChange={e => setForm({ ...form, emptyRoomSpeed: Number(e.target.value) })}
+                    min="1000"
+                    max="8000"
+                    step="500"
+                    value={form.connectionTimeoutMs}
+                    onChange={e => setForm({ ...form, connectionTimeoutMs: Number(e.target.value) })}
                     style={inputStyle}
                   />
                   <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', marginTop: 4 }}>
-                    Fan speed when room is vacant
+                    Timeout before marking query failed (3500ms default)
                   </div>
                 </div>
               </div>
             </div>
           </>
-        )}
-
-        {/* ── Tab 2: Device Connection ─────────────────────────── */}
-        {activeTab === 'connection' && (
-          <div className="card-solid" style={{ padding: '22px', borderRadius: 'var(--radius-lg)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-              <Wifi size={17} color="var(--accent-primary)" />
-              <h3 className="section-heading">ESP32 Network Configuration</h3>
-            </div>
-            <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: 18 }}>
-              Set the IP address where your ESP32 microcontroller serves its REST API.
-            </p>
-
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 16 }}>
-              <div>
-                <label style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', display: 'block', marginBottom: 6, fontWeight: 600 }}>
-                  Device Name
-                </label>
-                <input
-                  type="text"
-                  value={form.deviceName}
-                  onChange={e => setForm({ ...form, deviceName: e.target.value })}
-                  style={inputStyle}
-                />
-              </div>
-
-              <div>
-                <label style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', display: 'block', marginBottom: 6, fontWeight: 600 }}>
-                  ESP32 Base URL
-                </label>
-                <div style={{ display: 'flex', gap: 8 }}>
-                  <input
-                    type="text"
-                    value={form.esp32BaseUrl}
-                    onChange={e => setForm({ ...form, esp32BaseUrl: e.target.value })}
-                    placeholder="http://192.168.1.100"
-                    style={{ ...inputStyle, flex: 1, fontVariantNumeric: 'tabular-nums' }}
-                  />
-                  <button
-                    type="button"
-                    onClick={handlePing}
-                    disabled={isPinging}
-                    className="btn-secondary"
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 6,
-                      padding: '9px 16px',
-                      fontSize: '0.82rem',
-                      borderRadius: 'var(--radius-sm)',
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
-                    {isPinging ? <RefreshCw size={14} className="spin" /> : <Radio size={14} />}
-                    <span>Test Ping</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {pingResult && (
-              <div style={{
-                marginTop: 14,
-                padding: '12px 16px',
-                borderRadius: 'var(--radius-sm)',
-                background: pingResult.ok ? 'var(--color-success-bg)' : 'var(--color-error-bg)',
-                border: `1px solid ${pingResult.ok ? 'rgba(26, 158, 106, 0.25)' : 'rgba(192, 57, 43, 0.25)'}`,
-                fontSize: '0.82rem',
-                color: pingResult.ok ? 'var(--color-success)' : 'var(--color-error)',
-                fontWeight: 600,
-              }}>
-                {pingResult.ok 
-                  ? `✓ Device responsive (${pingResult.latencyMs}ms roundtrip).` 
-                  : `✗ Connection failed: ${pingResult.error || 'Device unreachable. Check Wi-Fi and IP.'}`}
-              </div>
-            )}
-          </div>
         )}
 
         {/* ── Tab 3: Diagnostics ───────────────────────────────── */}
@@ -349,7 +500,7 @@ export const SettingsPage: React.FC = () => {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 12 }}>
               {diagItems.map(({ label, value }) => (
                 <div key={label} style={{
-                  background: 'var(--bg-secondary)',
+                  background: 'var(--surface-2)',
                   padding: '14px 16px',
                   borderRadius: 'var(--radius-md)',
                   border: '1px solid var(--border-subtle)',
@@ -367,26 +518,18 @@ export const SettingsPage: React.FC = () => {
           <button
             type="submit"
             disabled={isSaving || commandPending}
+            className="btn-primary"
             style={{
-              background: 'linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%)',
-              color: '#FFFFFF',
-              border: 'none',
-              borderRadius: 'var(--radius-sm)',
               padding: '11px 28px',
               fontSize: '0.90rem',
-              fontWeight: 600,
-              cursor: isSaving ? 'wait' : 'pointer',
               display: 'flex',
               alignItems: 'center',
               gap: 8,
-              boxShadow: 'var(--shadow-teal)',
-              transition: 'all var(--transition-fast)',
-              fontFamily: 'var(--font-sans)',
               opacity: (isSaving || commandPending) ? 0.7 : 1,
             }}
           >
             {isSaving ? <RefreshCw size={16} className="spin" /> : <Save size={16} />}
-            <span>Save Settings</span>
+            <span>Save Configuration</span>
           </button>
         </div>
       </form>
