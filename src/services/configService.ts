@@ -36,8 +36,7 @@ export const DEFAULT_CONFIG: DeviceConfig = {
   // UI prefs
   tempUnit: 'C',
   enableAnimations: true,
-  reducedMotion: false,
-  demoMode: true // Defaults to Demo mode so application works out of the box with realistic telemetry
+  reducedMotion: false
 };
 
 export class ConfigService {

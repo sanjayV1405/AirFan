@@ -1,47 +1,53 @@
 import React, { useState, useEffect } from 'react';
 import { useAirLoop } from '../../context/AirLoopContext';
-import { Minus, Plus, Check, RefreshCw, Wind } from 'lucide-react';
+import { Minus, Plus, Check, RefreshCw, Wind, AlertCircle } from 'lucide-react';
 
 const PRESETS = [
   { label: 'Off', value: 0 },
-  { label: '25%', value: 25 },
-  { label: '50%', value: 50 },
-  { label: '75%', value: 75 },
+  { label: 'Low', value: 25 },
+  { label: 'Medium', value: 50 },
+  { label: 'High', value: 75 },
   { label: 'Max', value: 100 },
 ];
 
 export const SpeedDial: React.FC = () => {
-  const { telemetry, setFanSpeed, commandPending, setOperatingMode } = useAirLoop();
+  const { telemetry, connectionState, setFanSpeed, commandPending, setOperatingMode } = useAirLoop();
+  const isConnected = connectionState === 'connected';
+
   const [stagedSpeed, setStagedSpeed] = useState<number>(telemetry.requestedFanSpeedPercent);
   const [isApplying, setIsApplying] = useState<boolean>(false);
   const [hasUnappliedChanges, setHasUnappliedChanges] = useState<boolean>(false);
 
   useEffect(() => {
-    if (!hasUnappliedChanges) {
+    if (!hasUnappliedChanges && isConnected) {
       setStagedSpeed(telemetry.requestedFanSpeedPercent);
     }
-  }, [telemetry.requestedFanSpeedPercent, hasUnappliedChanges]);
+  }, [telemetry.requestedFanSpeedPercent, hasUnappliedChanges, isConnected]);
 
   const isManual = telemetry.activeMode === 'manual';
 
   const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!isConnected) return;
     const val = Number(e.target.value);
     setStagedSpeed(val);
     setHasUnappliedChanges(val !== telemetry.requestedFanSpeedPercent);
   };
 
   const handlePresetClick = (val: number) => {
+    if (!isConnected) return;
     setStagedSpeed(val);
     setHasUnappliedChanges(val !== telemetry.requestedFanSpeedPercent);
   };
 
   const handleStep = (delta: number) => {
+    if (!isConnected) return;
     const next = Math.max(0, Math.min(100, stagedSpeed + delta));
     setStagedSpeed(next);
     setHasUnappliedChanges(next !== telemetry.requestedFanSpeedPercent);
   };
 
   const handleApplySpeed = async () => {
+    if (!isConnected) return;
     setIsApplying(true);
     if (!isManual) {
       await setOperatingMode('manual');
@@ -55,30 +61,49 @@ export const SpeedDial: React.FC = () => {
 
   return (
     <div className="glass-panel" style={{
-      padding: '20px',
+      padding: '22px',
       borderRadius: '16px',
       position: 'relative'
     }}>
-      {/* Top Header */}
+      {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <Wind size={18} color="var(--accent-primary)" />
-          <h3 style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-            PWM Fan Control
-          </h3>
+          <div style={{
+            width: 32, height: 32, borderRadius: 8,
+            background: 'var(--accent-primary-dim)',
+            border: '1px solid var(--border-accent)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: 'var(--accent-primary)'
+          }}>
+            <Wind size={18} />
+          </div>
+          <div>
+            <h3 style={{ fontSize: '0.98rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+              Room Fan Speed
+            </h3>
+            <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+              {isConnected ? (isManual ? 'Manual Control' : 'Automatic Regulation') : 'Hardware Disconnected'}
+            </span>
+          </div>
         </div>
 
-        <div className="tabular-nums" style={{
-          fontSize: '0.78rem',
+        <div style={{
+          fontSize: '0.75rem',
           fontWeight: 600,
-          color: 'var(--accent-primary)',
+          color: isConnected && telemetry.fanRunningState === 'RUNNING' && telemetry.requestedFanSpeedPercent > 0 
+            ? 'var(--accent-primary)' 
+            : 'var(--text-muted)',
           fontFamily: 'var(--font-mono)',
-          background: 'var(--accent-primary-dim)',
-          border: '1px solid var(--border-accent)',
-          padding: '2px 8px',
-          borderRadius: 6
+          background: isConnected && telemetry.fanRunningState === 'RUNNING' && telemetry.requestedFanSpeedPercent > 0 
+            ? 'var(--accent-primary-dim)' 
+            : 'var(--surface-3)',
+          border: '1px solid var(--border-subtle)',
+          padding: '4px 10px',
+          borderRadius: 8
         }}>
-          {telemetry.hardwarePwmPercent !== null ? `${telemetry.hardwarePwmPercent}% PWM` : `${telemetry.requestedFanSpeedPercent}%`}
+          {isConnected 
+            ? (telemetry.hardwarePwmPercent !== null ? `${telemetry.hardwarePwmPercent}% Active` : `${telemetry.requestedFanSpeedPercent}% Target`)
+            : 'Offline'}
         </div>
       </div>
 
@@ -87,109 +112,116 @@ export const SpeedDial: React.FC = () => {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        padding: '6px 0 16px 0'
+        padding: '8px 0 16px 0',
+        opacity: isConnected ? 1 : 0.6
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
           <button
             onClick={() => handleStep(-5)}
-            disabled={stagedSpeed <= 0 || isApplying || commandPending}
-            title="Decrease 5%"
+            disabled={!isConnected || stagedSpeed <= 0 || isApplying || commandPending}
+            title="Decrease by 5%"
             aria-label="Decrease speed"
             style={{
-              width: 38,
-              height: 38,
+              width: 42,
+              height: 42,
               borderRadius: '50%',
               border: '1px solid var(--border-subtle)',
-              background: 'var(--surface-2)',
+              background: '#FFFFFF',
+              boxShadow: 'var(--shadow-sm)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               color: 'var(--text-primary)',
-              cursor: stagedSpeed <= 0 ? 'not-allowed' : 'pointer',
+              cursor: (!isConnected || stagedSpeed <= 0) ? 'not-allowed' : 'pointer',
               transition: 'all var(--transition-fast)'
             }}
           >
-            <Minus size={16} />
+            <Minus size={18} />
           </button>
 
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 2 }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 3 }}>
             <span className="tabular-nums" style={{
               fontFamily: 'var(--font-display)',
-              fontSize: '3rem',
-              fontWeight: 700,
-              color: stagedSpeed > 0 ? 'var(--accent-primary)' : 'var(--text-muted)',
+              fontSize: '3.4rem',
+              fontWeight: 800,
+              color: !isConnected ? 'var(--text-muted)' : stagedSpeed > 0 ? 'var(--accent-primary)' : 'var(--text-muted)',
               lineHeight: 1
             }}>
-              {stagedSpeed}
+              {isConnected ? stagedSpeed : '--'}
             </span>
-            <span style={{ fontSize: '1.2rem', color: 'var(--text-muted)', fontWeight: 600 }}>%</span>
+            <span style={{ fontSize: '1.4rem', color: 'var(--text-muted)', fontWeight: 600 }}>%</span>
           </div>
 
           <button
             onClick={() => handleStep(5)}
-            disabled={stagedSpeed >= 100 || isApplying || commandPending}
-            title="Increase 5%"
+            disabled={!isConnected || stagedSpeed >= 100 || isApplying || commandPending}
+            title="Increase by 5%"
             aria-label="Increase speed"
             style={{
-              width: 38,
-              height: 38,
+              width: 42,
+              height: 42,
               borderRadius: '50%',
               border: '1px solid var(--border-subtle)',
-              background: 'var(--surface-2)',
+              background: '#FFFFFF',
+              boxShadow: 'var(--shadow-sm)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               color: 'var(--text-primary)',
-              cursor: stagedSpeed >= 100 ? 'not-allowed' : 'pointer',
+              cursor: (!isConnected || stagedSpeed >= 100) ? 'not-allowed' : 'pointer',
               transition: 'all var(--transition-fast)'
             }}
           >
-            <Plus size={16} />
+            <Plus size={18} />
           </button>
         </div>
 
-        {/* Linear Range Slider */}
-        <div style={{ width: '100%', maxWidth: 360, marginTop: 16 }}>
+        {/* Smooth Slider */}
+        <div style={{ width: '100%', maxWidth: 380, marginTop: 18 }}>
           <input
             type="range"
             min="0"
             max="100"
             step="1"
-            value={stagedSpeed}
+            value={isConnected ? stagedSpeed : 0}
             onChange={handleSliderChange}
-            aria-label="Speed Slider"
+            disabled={!isConnected}
+            aria-label="Fan Speed Slider"
             style={{
               width: '100%',
-              background: `linear-gradient(to right, var(--accent-primary) 0%, var(--accent-secondary) ${stagedSpeed}%, var(--surface-3) ${stagedSpeed}%, var(--surface-3) 100%)`
+              background: isConnected
+                ? `linear-gradient(to right, #0891B2 0%, #2563EB ${stagedSpeed}%, #E2E8F0 ${stagedSpeed}%, #E2E8F0 100%)`
+                : '#E2E8F0'
             }}
           />
         </div>
       </div>
 
-      {/* Preset Pills */}
+      {/* Preset Buttons */}
       <div style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(5, 1fr)',
-        gap: 6,
+        gap: 8,
         marginTop: 4
       }}>
         {PRESETS.map(p => {
-          const isSelected = stagedSpeed === p.value;
+          const isSelected = isConnected && stagedSpeed === p.value;
           return (
             <button
               key={p.value}
               onClick={() => handlePresetClick(p.value)}
+              disabled={!isConnected}
               style={{
-                padding: '7px 4px',
+                padding: '8px 4px',
                 borderRadius: '8px',
                 border: isSelected ? '1px solid var(--accent-primary)' : '1px solid var(--border-subtle)',
-                background: isSelected ? 'var(--accent-primary-dim)' : 'var(--surface-2)',
+                background: isSelected ? 'var(--accent-primary-dim)' : '#FFFFFF',
                 color: isSelected ? 'var(--accent-primary)' : 'var(--text-secondary)',
-                fontWeight: isSelected ? 600 : 500,
-                fontSize: '0.78rem',
-                cursor: 'pointer',
+                boxShadow: isSelected ? 'var(--shadow-sm)' : 'none',
+                fontWeight: isSelected ? 700 : 500,
+                fontSize: '0.8rem',
+                cursor: isConnected ? 'pointer' : 'not-allowed',
                 textAlign: 'center',
-                fontFamily: 'var(--font-mono)',
                 transition: 'all var(--transition-fast)'
               }}
             >
@@ -199,47 +231,57 @@ export const SpeedDial: React.FC = () => {
         })}
       </div>
 
-      {/* Apply Speed Action */}
+      {/* Footer / Apply Action */}
       <div style={{
-        marginTop: 16,
-        paddingTop: 14,
+        marginTop: 18,
+        paddingTop: 16,
         borderTop: '1px solid var(--border-subtle)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
+        flexWrap: 'wrap',
         gap: 10
       }}>
-        <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-          {hasUnappliedChanges ? 'Ready to transmit PWM value' : isManual ? 'Synced with MOSFET driver' : 'Autonomous auto regulation'}
-        </span>
+        {!isConnected ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.78rem', color: 'var(--color-error)' }}>
+            <AlertCircle size={15} />
+            <span>Connect hardware to adjust fan speed.</span>
+          </div>
+        ) : (
+          <span style={{ fontSize: '0.76rem', color: 'var(--text-secondary)' }}>
+            {hasUnappliedChanges
+              ? 'Click Apply to transmit speed to room fan.'
+              : isManual ? 'Fan running at selected setpoint.' : 'Autonomous automatic climate regulation active.'}
+          </span>
+        )}
 
         <button
           onClick={handleApplySpeed}
-          disabled={isApplying || commandPending || (!hasUnappliedChanges && isManual)}
+          disabled={!isConnected || isApplying || commandPending || (!hasUnappliedChanges && isManual)}
           style={{
-            background: hasUnappliedChanges || !isManual ? 'var(--accent-primary)' : 'var(--surface-3)',
-            color: hasUnappliedChanges || !isManual ? 'var(--text-on-accent)' : 'var(--text-muted)',
+            background: isConnected && (hasUnappliedChanges || !isManual) ? 'var(--accent-primary)' : 'var(--surface-3)',
+            color: isConnected && (hasUnappliedChanges || !isManual) ? '#FFFFFF' : 'var(--text-muted)',
             border: 'none',
-            borderRadius: '8px',
-            padding: '8px 18px',
-            fontSize: '0.8rem',
+            borderRadius: '9px',
+            padding: '9px 20px',
+            fontSize: '0.82rem',
             fontWeight: 700,
-            cursor: hasUnappliedChanges || !isManual ? 'pointer' : 'default',
+            cursor: isConnected && (hasUnappliedChanges || !isManual) ? 'pointer' : 'not-allowed',
             display: 'flex',
             alignItems: 'center',
             gap: 6,
-            boxShadow: hasUnappliedChanges || !isManual ? '0 0 16px var(--accent-primary-glow)' : 'none',
+            boxShadow: isConnected && (hasUnappliedChanges || !isManual) ? 'var(--shadow-sm)' : 'none',
             transition: 'all var(--transition-fast)'
           }}
         >
           {isApplying || commandPending ? (
             <>
               <RefreshCw size={14} className="spin" />
-              <span>Transmitting...</span>
+              <span>Updating Hardware...</span>
             </>
           ) : (
             <>
-              <Check size={14} />
+              <Check size={15} />
               <span>Apply Speed</span>
             </>
           )}

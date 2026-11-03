@@ -6,28 +6,28 @@ import { Droplets } from 'lucide-react';
 
 export const WetZonePage: React.FC = () => {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 18, maxWidth: 1200, margin: '0 auto' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20, maxWidth: 1400, margin: '0 auto' }}>
       <div>
         <h1 style={{
           fontFamily: 'var(--font-display)',
-          fontSize: '1.3rem',
-          fontWeight: 700,
+          fontSize: '1.4rem',
+          fontWeight: 800,
           color: 'var(--text-primary)',
           display: 'flex',
           alignItems: 'center',
-          gap: 8
+          gap: 10
         }}>
-          <Droplets size={20} color="var(--accent-secondary)" />
-          <span>Wet Zone — Adaptive Ventilation Subsystem</span>
+          <Droplets size={22} color="var(--accent-secondary)" />
+          <span>Humidity &amp; Ventilation</span>
         </h1>
-        <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: 4 }}>
-          Rate-of-rise dynamic moisture detection and autonomous exhaust ventilation.
+        <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginTop: 4 }}>
+          Automatic moisture detection and smart air extraction to prevent dampness and odors.
         </p>
       </div>
 
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))',
         gap: 16
       }}>
         <MoistureIndicator />
@@ -35,11 +35,11 @@ export const WetZonePage: React.FC = () => {
       </div>
 
       <div className="glass-panel" style={{
-        padding: '20px',
+        padding: '22px',
         borderRadius: '16px'
       }}>
-        <h3 style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 12 }}>
-          Relative Humidity vs Rolling Median Baseline
+        <h3 style={{ fontSize: '0.98rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>
+          Room Moisture vs Target Baseline
         </h3>
         <TelemetryChart type="humidity" height={220} />
       </div>

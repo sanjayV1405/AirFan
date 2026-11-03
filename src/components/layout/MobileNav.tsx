@@ -1,14 +1,14 @@
 import React from 'react';
 import { useAirLoop } from '../../context/AirLoopContext';
-import { LayoutDashboard, Wind, Droplets, Cpu, History, Settings } from 'lucide-react';
+import { LayoutDashboard, Wind, Sliders, Droplets, Cpu, Settings } from 'lucide-react';
 
 const MOBILE_NAV_ITEMS = [
-  { id: 'overview',  label: 'Home',     icon: LayoutDashboard },
-  { id: 'comfort',   label: 'Comfort',  icon: Wind },
-  { id: 'wetzone',   label: 'Wet',      icon: Droplets },
-  { id: 'sensors',   label: 'Sensors',  icon: Cpu },
-  { id: 'history',   label: 'History',  icon: History },
-  { id: 'settings',  label: 'Settings', icon: Settings },
+  { id: 'overview',  label: 'Home',         icon: LayoutDashboard },
+  { id: 'comfort',   label: 'Comfort',      icon: Wind },
+  { id: 'fan',       label: 'Fan',          icon: Sliders },
+  { id: 'wetzone',   label: 'Ventilation',  icon: Droplets },
+  { id: 'sensors',   label: 'Sensors',      icon: Cpu },
+  { id: 'settings',  label: 'Settings',     icon: Settings },
 ];
 
 export const MobileNav: React.FC = () => {
@@ -23,14 +23,15 @@ export const MobileNav: React.FC = () => {
         bottom: 0, left: 0, right: 0,
         background: 'var(--mobilenav-bg)',
         backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
         borderTop: '1px solid var(--mobilenav-border)',
         display: 'flex',
         justifyContent: 'space-around',
         alignItems: 'center',
-        padding: '6px 4px max(6px, env(safe-area-inset-bottom)) 4px',
+        padding: '6px 4px max(8px, env(safe-area-inset-bottom)) 4px',
         zIndex: 50,
         boxShadow: 'var(--shadow-md)',
-        transition: 'background var(--transition-normal), border-color var(--transition-normal)'
+        transition: 'all var(--transition-normal)'
       }}
     >
       {MOBILE_NAV_ITEMS.map(item => {
@@ -49,15 +50,15 @@ export const MobileNav: React.FC = () => {
               flexDirection: 'column',
               alignItems: 'center',
               gap: 3,
-              padding: '5px 8px',
+              padding: '6px 10px',
               borderRadius: 8,
               cursor: 'pointer',
-              minWidth: 44,
+              minWidth: 48,
               transition: 'color var(--transition-fast)'
             }}
           >
-            <Icon size={18} color={isActive ? 'var(--accent-primary)' : 'var(--text-muted)'} />
-            <span style={{ fontSize: '0.62rem', fontWeight: isActive ? 600 : 500 }}>
+            <Icon size={19} color={isActive ? 'var(--accent-primary)' : 'var(--text-muted)'} />
+            <span style={{ fontSize: '0.66rem', fontWeight: isActive ? 600 : 500 }}>
               {item.label}
             </span>
           </button>

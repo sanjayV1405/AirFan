@@ -1,4 +1,4 @@
-export type ConnectionState = 'connected' | 'connecting' | 'offline' | 'error' | 'demo';
+export type ConnectionState = 'connected' | 'connecting' | 'offline' | 'error';
 
 export type OperatingMode = 'manual' | 'auto';
 
@@ -102,7 +102,6 @@ export interface DeviceConfig {
   tempUnit: 'C' | 'F';
   enableAnimations: boolean;
   reducedMotion: boolean;
-  demoMode: boolean;
 }
 
 export type EventCategory = 'command' | 'sensor' | 'system' | 'ventilation';
@@ -114,7 +113,7 @@ export interface ActivityEvent {
   type: string;
   title: string;
   message: string;
-  source: 'DEVICE' | 'FRONTEND' | 'SIMULATION';
+  source: 'DEVICE' | 'FRONTEND';
   details?: Record<string, any>;
   level: 'info' | 'success' | 'warning' | 'error';
 }

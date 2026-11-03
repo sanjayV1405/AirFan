@@ -3,9 +3,9 @@ import { AirLoopProvider, useAirLoop } from './context/AirLoopContext';
 import { Header } from './components/layout/Header';
 import { Sidebar } from './components/layout/Sidebar';
 import { MobileNav } from './components/layout/MobileNav';
-import { DemoBanner } from './components/layout/DemoBanner';
 import { OverviewPage } from './pages/OverviewPage';
 import { ComfortZonePage } from './pages/ComfortZonePage';
+import { FanControlPage } from './pages/FanControlPage';
 import { WetZonePage } from './pages/WetZonePage';
 import { SensorsPage } from './pages/SensorsPage';
 import { HistoryPage } from './pages/HistoryPage';
@@ -18,6 +18,8 @@ const AppContent: React.FC = () => {
     switch (activeNav) {
       case 'comfort':
         return <ComfortZonePage />;
+      case 'fan':
+        return <FanControlPage />;
       case 'wetzone':
         return <WetZonePage />;
       case 'sensors':
@@ -34,11 +36,8 @@ const AppContent: React.FC = () => {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', position: 'relative' }}>
-      {/* Background Ambient Glow */}
+      {/* Background Ambient Lighting */}
       <div className="ambient-bg" />
-
-      {/* Persistent Demo Warning Banner when in Simulation Mode */}
-      <DemoBanner />
 
       {/* Main Top Header */}
       <Header />
@@ -59,7 +58,7 @@ const AppContent: React.FC = () => {
         {/* Dynamic Route Content Area */}
         <main style={{
           flex: 1,
-          padding: '24px 24px 80px 24px',
+          padding: '24px 28px 84px 28px',
           minWidth: 0,
           overflowX: 'hidden'
         }}>

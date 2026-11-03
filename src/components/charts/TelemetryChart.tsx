@@ -14,7 +14,7 @@ import {
 import { historyService } from '../../services/historyService';
 import { TelemetryHistoryPoint } from '../../types/telemetry';
 import { useAirLoop } from '../../context/AirLoopContext';
-import { RefreshCw } from 'lucide-react';
+import { Activity } from 'lucide-react';
 
 interface TelemetryChartProps {
   type?: 'temperature' | 'humidity' | 'fans';
@@ -22,23 +22,37 @@ interface TelemetryChartProps {
 }
 
 export const TelemetryChart: React.FC<TelemetryChartProps> = ({ type = 'temperature', height = 220 }) => {
-  const { theme } = useAirLoop();
-  const isDark = theme === 'dark';
+  const { connectionState } = useAirLoop();
+  const isConnected = connectionState === 'connected';
+
   const [data, setData] = useState<TelemetryHistoryPoint[]>([]);
   const [timeFilter, setTimeFilter] = useState<'15m' | '1h' | 'all'>('15m');
 
-  const primaryColor = isDark ? '#00D4AA' : '#0D9488';
-  const secondaryColor = isDark ? '#3B82F6' : '#2563EB';
-  const gridColor = isDark ? 'rgba(255, 255, 255, 0.05)' : '#E2E8F0';
-  const axisColor = isDark ? '#5A677D' : '#64748B';
+  const primaryColor = '#0891B2';
+  const secondaryColor = '#2563EB';
+  const gridColor = '#F1F5F9';
+  const axisColor = '#64748B';
 
   const tooltipStyle = {
-    backgroundColor: isDark ? '#0F1525' : '#FFFFFF',
-    border: isDark ? `1px solid rgba(0, 212, 170, 0.3)` : '1px solid #CBD5E1',
-    borderRadius: 8,
-    boxShadow: isDark ? '0 4px 16px rgba(0,0,0,0.6)' : '0 4px 14px rgba(15, 23, 42, 0.08)',
-    fontSize: '0.75rem',
-    color: isDark ? '#E8EDF5' : '#0B192C'
+    backgroundColor: '#FFFFFF',
+    border: '1px solid #E2E8F0',
+    borderRadius: 10,
+    boxShadow: '0 8px 20px -4px rgba(15, 23, 42, 0.1)',
+    fontSize: '0.78rem',
+    color: '#0F172A',
+    padding: '8px 12px'
+  };
+
+  const tooltipItemStyle = {
+    color: '#0F172A',
+    fontSize: '0.78rem',
+    fontWeight: 600
+  };
+
+  const tooltipLabelStyle = {
+    color: '#475569',
+    fontWeight: 700,
+    marginBottom: 4
   };
 
   useEffect(() => {
@@ -58,7 +72,7 @@ export const TelemetryChart: React.FC<TelemetryChartProps> = ({ type = 'temperat
     return () => clearInterval(interval);
   }, [timeFilter]);
 
-  if (data.length === 0) {
+  if (data.length === 0 || !isConnected) {
     return (
       <div style={{
         height,
@@ -67,14 +81,23 @@ export const TelemetryChart: React.FC<TelemetryChartProps> = ({ type = 'temperat
         alignItems: 'center',
         justifyContent: 'center',
         background: 'var(--surface-2)',
-        borderRadius: 12,
-        border: '1px solid var(--border-subtle)',
+        borderRadius: 14,
+        border: '1px dashed var(--border-medium)',
         color: 'var(--text-muted)',
-        fontSize: '0.82rem',
-        gap: 6
+        fontSize: '0.84rem',
+        gap: 8,
+        padding: 20,
+        textAlign: 'center'
       }}>
-        <RefreshCw size={18} className="spin" color="var(--accent-primary)" />
-        <span>Collecting real-time telemetry stream...</span>
+        <Activity size={22} color="var(--accent-primary)" />
+        <span style={{ fontWeight: 600, color: 'var(--text-secondary)' }}>
+          {!isConnected ? 'Hardware Disconnected' : 'Collecting Real Hardware Telemetry...'}
+        </span>
+        <span style={{ fontSize: '0.74rem' }}>
+          {!isConnected 
+            ? 'Connect your ESP32 device to view live telemetry history.' 
+            : 'Receiving sensor data points directly from microcontroller.'}
+        </span>
       </div>
     );
   }
@@ -82,25 +105,26 @@ export const TelemetryChart: React.FC<TelemetryChartProps> = ({ type = 'temperat
   return (
     <div>
       {/* Time Range Filter */}
-      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 4, marginBottom: 10 }}>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 6, marginBottom: 12 }}>
         {(['15m', '1h', 'all'] as const).map(f => (
           <button
             key={f}
             onClick={() => setTimeFilter(f)}
             style={{
-              background: timeFilter === f ? 'var(--accent-primary-dim)' : 'var(--surface-2)',
-              border: timeFilter === f ? '1px solid var(--border-accent)' : '1px solid var(--border-subtle)',
+              background: timeFilter === f ? '#FFFFFF' : 'var(--surface-2)',
+              border: timeFilter === f ? '1px solid var(--accent-primary)' : '1px solid var(--border-subtle)',
               color: timeFilter === f ? 'var(--accent-primary)' : 'var(--text-secondary)',
-              fontSize: '0.7rem',
-              fontWeight: 600,
-              padding: '3px 8px',
-              borderRadius: 4,
+              boxShadow: timeFilter === f ? 'var(--shadow-sm)' : 'none',
+              fontSize: '0.72rem',
+              fontWeight: 700,
+              padding: '4px 10px',
+              borderRadius: 6,
               cursor: 'pointer',
               fontFamily: 'var(--font-mono)',
               transition: 'all var(--transition-fast)'
             }}
           >
-            {f === 'all' ? 'All' : f}
+            {f === 'all' ? 'All Data' : f}
           </button>
         ))}
       </div>
@@ -108,67 +132,57 @@ export const TelemetryChart: React.FC<TelemetryChartProps> = ({ type = 'temperat
       <div style={{ width: '100%', height }}>
         <ResponsiveContainer width="100%" height="100%">
           {type === 'temperature' ? (
-            <AreaChart data={data} margin={{ top: 6, right: 6, left: -25, bottom: 0 }}>
+            <AreaChart data={data} margin={{ top: 6, right: 8, left: -20, bottom: 0 }}>
               <defs>
-                <linearGradient id="tempDynamicGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={primaryColor} stopOpacity={0.25}/>
+                <linearGradient id="tempRealGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor={primaryColor} stopOpacity={0.18}/>
                   <stop offset="95%" stopColor={primaryColor} stopOpacity={0.0}/>
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke={gridColor} vertical={false} />
               <XAxis dataKey="timeStr" stroke={axisColor} fontSize={11} tickLine={false} />
               <YAxis domain={['auto', 'auto']} stroke={axisColor} fontSize={11} unit="°C" tickLine={false} />
-              <Tooltip contentStyle={tooltipStyle} />
+              <Tooltip contentStyle={tooltipStyle} itemStyle={tooltipItemStyle} labelStyle={tooltipLabelStyle} />
               <Area 
                 type="monotone" 
                 dataKey="comfortTemp" 
-                name="Temperature (°C)" 
+                name="Room Temperature (°C)" 
                 stroke={primaryColor} 
-                strokeWidth={2} 
+                strokeWidth={2.5} 
                 fillOpacity={1} 
-                fill="url(#tempDynamicGrad)" 
+                fill="url(#tempRealGrad)" 
               />
             </AreaChart>
           ) : type === 'humidity' ? (
-            <LineChart data={data} margin={{ top: 6, right: 6, left: -25, bottom: 0 }}>
+            <LineChart data={data} margin={{ top: 6, right: 8, left: -20, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke={gridColor} vertical={false} />
               <XAxis dataKey="timeStr" stroke={axisColor} fontSize={11} tickLine={false} />
               <YAxis domain={[30, 95]} stroke={axisColor} fontSize={11} unit="%" tickLine={false} />
-              <Tooltip 
-                contentStyle={{ 
-                  ...tooltipStyle,
-                  border: isDark ? '1px solid rgba(59, 130, 246, 0.3)' : '1px solid #CBD5E1' 
-                }} 
-              />
-              <Legend wrapperStyle={{ fontSize: '0.72rem', paddingTop: '4px', color: 'var(--text-secondary)' }} />
-              <Line type="monotone" dataKey="wetHumidity" name="Wet Zone Humidity" stroke={secondaryColor} strokeWidth={2} dot={false} />
-              <Line type="monotone" dataKey="humidityBaseline" name="Baseline" stroke="var(--accent-amber)" strokeWidth={1.5} strokeDasharray="4 4" dot={false} />
+              <Tooltip contentStyle={tooltipStyle} itemStyle={tooltipItemStyle} labelStyle={tooltipLabelStyle} />
+              <Legend wrapperStyle={{ fontSize: '0.76rem', paddingTop: '6px', color: 'var(--text-secondary)' }} />
+              <Line type="monotone" dataKey="wetHumidity" name="Room Moisture (%)" stroke={secondaryColor} strokeWidth={2.5} dot={false} />
+              <Line type="monotone" dataKey="humidityBaseline" name="Target Baseline" stroke="var(--accent-amber)" strokeWidth={1.5} strokeDasharray="4 4" dot={false} />
             </LineChart>
           ) : (
-            <AreaChart data={data} margin={{ top: 6, right: 6, left: -25, bottom: 0 }}>
+            <AreaChart data={data} margin={{ top: 6, right: 8, left: -20, bottom: 0 }}>
               <defs>
-                <linearGradient id="fanDynamicGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={secondaryColor} stopOpacity={0.25}/>
+                <linearGradient id="fanRealGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor={secondaryColor} stopOpacity={0.18}/>
                   <stop offset="95%" stopColor={secondaryColor} stopOpacity={0.0}/>
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke={gridColor} vertical={false} />
               <XAxis dataKey="timeStr" stroke={axisColor} fontSize={11} tickLine={false} />
               <YAxis domain={[0, 100]} stroke={axisColor} fontSize={11} unit="%" tickLine={false} />
-              <Tooltip 
-                contentStyle={{ 
-                  ...tooltipStyle,
-                  border: isDark ? '1px solid rgba(59, 130, 246, 0.3)' : '1px solid #CBD5E1' 
-                }} 
-              />
+              <Tooltip contentStyle={tooltipStyle} itemStyle={tooltipItemStyle} labelStyle={tooltipLabelStyle} />
               <Area 
                 type="stepAfter" 
                 dataKey="fanSpeedPercent" 
-                name="Fan PWM (%)" 
+                name="Room Fan Speed (%)" 
                 stroke={secondaryColor} 
-                strokeWidth={2} 
+                strokeWidth={2.5} 
                 fillOpacity={1} 
-                fill="url(#fanDynamicGrad)" 
+                fill="url(#fanRealGrad)" 
               />
             </AreaChart>
           )}
