@@ -21,38 +21,40 @@ interface TelemetryChartProps {
   height?: number;
 }
 
-export const TelemetryChart: React.FC<TelemetryChartProps> = ({ type = 'temperature', height = 220 }) => {
+export const TelemetryChart: React.FC<TelemetryChartProps> = ({ type = 'temperature', height = 210 }) => {
   const { connectionState } = useAirLoop();
   const isConnected = connectionState === 'connected';
 
   const [data, setData] = useState<TelemetryHistoryPoint[]>([]);
   const [timeFilter, setTimeFilter] = useState<'15m' | '1h' | 'all'>('15m');
 
-  const primaryColor = '#0891B2';
-  const secondaryColor = '#2563EB';
-  const gridColor = '#F1F5F9';
+  const primaryColor = '#00F2FE';
+  const secondaryColor = '#3B82F6';
+  const gridColor = 'rgba(255, 255, 255, 0.05)';
   const axisColor = '#64748B';
 
   const tooltipStyle = {
-    backgroundColor: '#FFFFFF',
-    border: '1px solid #E2E8F0',
+    backgroundColor: 'rgba(11, 17, 32, 0.95)',
+    backdropFilter: 'blur(12px)',
+    border: '1px solid rgba(0, 242, 254, 0.3)',
     borderRadius: 10,
-    boxShadow: '0 8px 20px -4px rgba(15, 23, 42, 0.1)',
+    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.7), 0 0 16px rgba(0, 242, 254, 0.15)',
     fontSize: '0.78rem',
-    color: '#0F172A',
+    color: '#F8FAFC',
     padding: '8px 12px'
   };
 
   const tooltipItemStyle = {
-    color: '#0F172A',
+    color: '#F8FAFC',
     fontSize: '0.78rem',
     fontWeight: 600
   };
 
   const tooltipLabelStyle = {
-    color: '#475569',
+    color: '#94A3B8',
     fontWeight: 700,
-    marginBottom: 4
+    marginBottom: 4,
+    fontFamily: 'var(--font-mono)'
   };
 
   useEffect(() => {
@@ -80,23 +82,23 @@ export const TelemetryChart: React.FC<TelemetryChartProps> = ({ type = 'temperat
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        background: 'var(--surface-2)',
+        background: 'rgba(11, 17, 32, 0.5)',
         borderRadius: 14,
-        border: '1px dashed var(--border-medium)',
+        border: '1px dashed rgba(255, 255, 255, 0.12)',
         color: 'var(--text-muted)',
-        fontSize: '0.84rem',
+        fontSize: '0.82rem',
         gap: 8,
         padding: 20,
         textAlign: 'center'
       }}>
         <Activity size={22} color="var(--accent-primary)" />
-        <span style={{ fontWeight: 600, color: 'var(--text-secondary)' }}>
-          {!isConnected ? 'Hardware Disconnected' : 'Collecting Real Hardware Telemetry...'}
+        <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>
+          {!isConnected ? 'Hardware Offline' : 'Awaiting Real Telemetry Stream...'}
         </span>
         <span style={{ fontSize: '0.74rem' }}>
           {!isConnected 
-            ? 'Connect your ESP32 device to view live telemetry history.' 
-            : 'Receiving sensor data points directly from microcontroller.'}
+            ? 'Connect your physical ESP32 to visualize real-time climate data.' 
+            : 'Receiving live telemetry packets from microcontroller.'}
         </span>
       </div>
     );
@@ -111,10 +113,10 @@ export const TelemetryChart: React.FC<TelemetryChartProps> = ({ type = 'temperat
             key={f}
             onClick={() => setTimeFilter(f)}
             style={{
-              background: timeFilter === f ? '#FFFFFF' : 'var(--surface-2)',
+              background: timeFilter === f ? 'var(--accent-primary-dim)' : 'rgba(20, 31, 56, 0.5)',
               border: timeFilter === f ? '1px solid var(--accent-primary)' : '1px solid var(--border-subtle)',
               color: timeFilter === f ? 'var(--accent-primary)' : 'var(--text-secondary)',
-              boxShadow: timeFilter === f ? 'var(--shadow-sm)' : 'none',
+              boxShadow: timeFilter === f ? '0 0 12px rgba(0, 242, 254, 0.2)' : 'none',
               fontSize: '0.72rem',
               fontWeight: 700,
               padding: '4px 10px',
@@ -134,8 +136,8 @@ export const TelemetryChart: React.FC<TelemetryChartProps> = ({ type = 'temperat
           {type === 'temperature' ? (
             <AreaChart data={data} margin={{ top: 6, right: 8, left: -20, bottom: 0 }}>
               <defs>
-                <linearGradient id="tempRealGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={primaryColor} stopOpacity={0.18}/>
+                <linearGradient id="midnightTempGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor={primaryColor} stopOpacity={0.28}/>
                   <stop offset="95%" stopColor={primaryColor} stopOpacity={0.0}/>
                 </linearGradient>
               </defs>
@@ -150,7 +152,7 @@ export const TelemetryChart: React.FC<TelemetryChartProps> = ({ type = 'temperat
                 stroke={primaryColor} 
                 strokeWidth={2.5} 
                 fillOpacity={1} 
-                fill="url(#tempRealGrad)" 
+                fill="url(#midnightTempGrad)" 
               />
             </AreaChart>
           ) : type === 'humidity' ? (
@@ -160,14 +162,14 @@ export const TelemetryChart: React.FC<TelemetryChartProps> = ({ type = 'temperat
               <YAxis domain={[30, 95]} stroke={axisColor} fontSize={11} unit="%" tickLine={false} />
               <Tooltip contentStyle={tooltipStyle} itemStyle={tooltipItemStyle} labelStyle={tooltipLabelStyle} />
               <Legend wrapperStyle={{ fontSize: '0.76rem', paddingTop: '6px', color: 'var(--text-secondary)' }} />
-              <Line type="monotone" dataKey="wetHumidity" name="Room Moisture (%)" stroke={secondaryColor} strokeWidth={2.5} dot={false} />
+              <Line type="monotone" dataKey="wetHumidity" name="Room Moisture (%)" stroke={primaryColor} strokeWidth={2.5} dot={false} />
               <Line type="monotone" dataKey="humidityBaseline" name="Target Baseline" stroke="var(--accent-amber)" strokeWidth={1.5} strokeDasharray="4 4" dot={false} />
             </LineChart>
           ) : (
             <AreaChart data={data} margin={{ top: 6, right: 8, left: -20, bottom: 0 }}>
               <defs>
-                <linearGradient id="fanRealGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={secondaryColor} stopOpacity={0.18}/>
+                <linearGradient id="midnightFanGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor={secondaryColor} stopOpacity={0.28}/>
                   <stop offset="95%" stopColor={secondaryColor} stopOpacity={0.0}/>
                 </linearGradient>
               </defs>
@@ -178,11 +180,11 @@ export const TelemetryChart: React.FC<TelemetryChartProps> = ({ type = 'temperat
               <Area 
                 type="stepAfter" 
                 dataKey="fanSpeedPercent" 
-                name="Room Fan Speed (%)" 
+                name="Ceiling Fan Speed (%)" 
                 stroke={secondaryColor} 
                 strokeWidth={2.5} 
                 fillOpacity={1} 
-                fill="url(#fanRealGrad)" 
+                fill="url(#midnightFanGrad)" 
               />
             </AreaChart>
           )}

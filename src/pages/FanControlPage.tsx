@@ -19,22 +19,23 @@ export const FanControlPage: React.FC = () => {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 20, maxWidth: 1400, margin: '0 auto' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 24, maxWidth: 1440, margin: '0 auto' }}>
       <div>
         <h1 style={{
           fontFamily: 'var(--font-display)',
-          fontSize: '1.4rem',
+          fontSize: '1.45rem',
           fontWeight: 800,
           color: 'var(--text-primary)',
           display: 'flex',
           alignItems: 'center',
-          gap: 10
+          gap: 10,
+          letterSpacing: '-0.02em'
         }}>
-          <Sliders size={22} color="var(--accent-primary)" />
-          <span>Room Fan Control</span>
+          <Sliders size={24} color="var(--accent-primary)" />
+          <span>Ceiling Fan Control Station</span>
         </h1>
-        <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginTop: 4 }}>
-          Adjust ventilation speed, select operation mode, and monitor hardware output.
+        <p style={{ fontSize: '0.84rem', color: 'var(--text-secondary)', marginTop: 4 }}>
+          Control room ceiling fan speed, switch between manual and automatic modes, and inspect PWM hardware feedback.
         </p>
       </div>
 
@@ -42,56 +43,56 @@ export const FanControlPage: React.FC = () => {
 
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))',
-        gap: 16
+        gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))',
+        gap: 18
       }}>
-        {/* Fan visualizer */}
+        {/* Realistic Ceiling Fan Model */}
         <div className="glass-panel" style={{
-          padding: '24px',
-          borderRadius: 16,
+          padding: '28px',
+          borderRadius: 18,
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          minHeight: 320
+          minHeight: 340
         }}>
-          <FanVisualization size={230} showLabels={true} />
+          <FanVisualization size={260} showLabels={true} />
         </div>
 
-        {/* Speed Controls */}
+        {/* Ceiling Fan Speed Dial */}
         <SpeedDial />
       </div>
 
       {/* Quick Comfort Presets */}
-      <div className="glass-panel" style={{ padding: '20px', borderRadius: 16 }}>
-        <h3 style={{ fontSize: '0.98rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>
-          Quick Comfort Presets
+      <div className="glass-panel" style={{ padding: '24px', borderRadius: 18 }}>
+        <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 14, letterSpacing: '-0.02em' }}>
+          Quick Airflow Presets
         </h3>
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-          gap: 12
+          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+          gap: 14
         }}>
           <button
             onClick={() => applyQuickPreset(20)}
             disabled={!isConnected}
             style={{
-              background: '#FFFFFF',
+              background: 'rgba(20, 31, 56, 0.55)',
               border: '1px solid var(--border-subtle)',
-              borderRadius: 12,
-              padding: '14px',
+              borderRadius: 14,
+              padding: '16px',
               textAlign: 'left',
               cursor: isConnected ? 'pointer' : 'not-allowed',
               boxShadow: 'var(--shadow-sm)',
               transition: 'all var(--transition-fast)'
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#0284C7', marginBottom: 4 }}>
-              <Moon size={16} />
-              <strong style={{ fontSize: '0.84rem' }}>Sleep / Quiet</strong>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#38BDF8', marginBottom: 4 }}>
+              <Moon size={18} />
+              <strong style={{ fontSize: '0.9rem' }}>Quiet Night (20%)</strong>
             </div>
-            <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
-              20% speed for whisper-quiet night airflow.
+            <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)', lineHeight: 1.4 }}>
+              Gentle silent airflow optimized for sleeping.
             </div>
           </button>
 
@@ -99,22 +100,22 @@ export const FanControlPage: React.FC = () => {
             onClick={() => applyQuickPreset(40)}
             disabled={!isConnected}
             style={{
-              background: '#FFFFFF',
+              background: 'rgba(20, 31, 56, 0.55)',
               border: '1px solid var(--border-subtle)',
-              borderRadius: 12,
-              padding: '14px',
+              borderRadius: 14,
+              padding: '16px',
               textAlign: 'left',
               cursor: isConnected ? 'pointer' : 'not-allowed',
               boxShadow: 'var(--shadow-sm)',
               transition: 'all var(--transition-fast)'
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#059669', marginBottom: 4 }}>
-              <Leaf size={16} />
-              <strong style={{ fontSize: '0.84rem' }}>Eco Fresh</strong>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#10B981', marginBottom: 4 }}>
+              <Leaf size={18} />
+              <strong style={{ fontSize: '0.9rem' }}>Eco Fresh (40%)</strong>
             </div>
-            <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
-              40% speed for energy-efficient circulation.
+            <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)', lineHeight: 1.4 }}>
+              Energy-efficient constant gentle room circulation.
             </div>
           </button>
 
@@ -122,22 +123,22 @@ export const FanControlPage: React.FC = () => {
             onClick={() => applyQuickPreset(70)}
             disabled={!isConnected}
             style={{
-              background: '#FFFFFF',
+              background: 'rgba(20, 31, 56, 0.55)',
               border: '1px solid var(--border-subtle)',
-              borderRadius: 12,
-              padding: '14px',
+              borderRadius: 14,
+              padding: '16px',
               textAlign: 'left',
               cursor: isConnected ? 'pointer' : 'not-allowed',
               boxShadow: 'var(--shadow-sm)',
               transition: 'all var(--transition-fast)'
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#D97706', marginBottom: 4 }}>
-              <Wind size={16} />
-              <strong style={{ fontSize: '0.84rem' }}>Standard Breeze</strong>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#F59E0B', marginBottom: 4 }}>
+              <Wind size={18} />
+              <strong style={{ fontSize: '0.9rem' }}>Comfort Breeze (70%)</strong>
             </div>
-            <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
-              70% speed for active cooling.
+            <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)', lineHeight: 1.4 }}>
+              Strong, refreshing cooling when room feels warm.
             </div>
           </button>
 
@@ -145,33 +146,33 @@ export const FanControlPage: React.FC = () => {
             onClick={() => applyQuickPreset(100)}
             disabled={!isConnected}
             style={{
-              background: '#FFFFFF',
+              background: 'rgba(20, 31, 56, 0.55)',
               border: '1px solid var(--border-subtle)',
-              borderRadius: 12,
-              padding: '14px',
+              borderRadius: 14,
+              padding: '16px',
               textAlign: 'left',
               cursor: isConnected ? 'pointer' : 'not-allowed',
               boxShadow: 'var(--shadow-sm)',
               transition: 'all var(--transition-fast)'
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#DC2626', marginBottom: 4 }}>
-              <Flame size={16} />
-              <strong style={{ fontSize: '0.84rem' }}>Maximum Boost</strong>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#EF4444', marginBottom: 4 }}>
+              <Flame size={18} />
+              <strong style={{ fontSize: '0.9rem' }}>Maximum Boost (100%)</strong>
             </div>
-            <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
-              100% full speed rapid thermal relief.
+            <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)', lineHeight: 1.4 }}>
+              Full 25kHz PWM duty for rapid room heat relief.
             </div>
           </button>
         </div>
       </div>
 
-      {/* Fan PWM Duty Cycle Output Log */}
-      <div className="glass-panel" style={{ padding: '22px', borderRadius: 16 }}>
-        <h3 style={{ fontSize: '0.98rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>
-          Room Fan Speed History
+      {/* Ceiling Fan Speed History */}
+      <div className="glass-panel" style={{ padding: '24px', borderRadius: 18 }}>
+        <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 14, letterSpacing: '-0.02em' }}>
+          Ceiling Fan PWM Duty Cycle Log
         </h3>
-        <TelemetryChart type="fans" height={200} />
+        <TelemetryChart type="fans" height={210} />
       </div>
     </div>
   );

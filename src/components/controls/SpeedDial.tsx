@@ -61,35 +61,37 @@ export const SpeedDial: React.FC = () => {
 
   return (
     <div className="glass-panel" style={{
-      padding: '22px',
-      borderRadius: '16px',
+      padding: '24px',
+      borderRadius: '18px',
       position: 'relative'
     }}>
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <div style={{
-            width: 32, height: 32, borderRadius: 8,
+            width: 38, height: 38, borderRadius: 10,
             background: 'var(--accent-primary-dim)',
             border: '1px solid var(--border-accent)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            color: 'var(--accent-primary)'
+            color: 'var(--accent-primary)',
+            boxShadow: '0 0 16px rgba(0, 242, 254, 0.15)'
           }}>
-            <Wind size={18} />
+            <Wind size={20} />
           </div>
           <div>
-            <h3 style={{ fontSize: '0.98rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-              Room Fan Speed
+            <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
+              Ceiling Fan Controls
             </h3>
-            <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-              {isConnected ? (isManual ? 'Manual Control' : 'Automatic Regulation') : 'Hardware Disconnected'}
+            <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
+              {isConnected ? (isManual ? 'Manual Target Setpoint' : 'Automatic Autonomous Speed') : 'Hardware Offline'}
             </span>
           </div>
         </div>
 
+        {/* Speed / Hardware Output Pill */}
         <div style={{
-          fontSize: '0.75rem',
-          fontWeight: 600,
+          fontSize: '0.76rem',
+          fontWeight: 700,
           color: isConnected && telemetry.fanRunningState === 'RUNNING' && telemetry.requestedFanSpeedPercent > 0 
             ? 'var(--accent-primary)' 
             : 'var(--text-muted)',
@@ -97,12 +99,12 @@ export const SpeedDial: React.FC = () => {
           background: isConnected && telemetry.fanRunningState === 'RUNNING' && telemetry.requestedFanSpeedPercent > 0 
             ? 'var(--accent-primary-dim)' 
             : 'var(--surface-3)',
-          border: '1px solid var(--border-subtle)',
-          padding: '4px 10px',
+          border: `1px solid ${isConnected && telemetry.fanRunningState === 'RUNNING' && telemetry.requestedFanSpeedPercent > 0 ? 'var(--border-accent)' : 'var(--border-subtle)'}`,
+          padding: '4px 12px',
           borderRadius: 8
         }}>
           {isConnected 
-            ? (telemetry.hardwarePwmPercent !== null ? `${telemetry.hardwarePwmPercent}% Active` : `${telemetry.requestedFanSpeedPercent}% Target`)
+            ? (telemetry.hardwarePwmPercent !== null ? `${telemetry.hardwarePwmPercent}% Output` : `${telemetry.requestedFanSpeedPercent}% Target`)
             : 'Offline'}
         </div>
       </div>
@@ -112,21 +114,21 @@ export const SpeedDial: React.FC = () => {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        padding: '8px 0 16px 0',
-        opacity: isConnected ? 1 : 0.6
+        padding: '10px 0 18px 0',
+        opacity: isConnected ? 1 : 0.55
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 28 }}>
           <button
             onClick={() => handleStep(-5)}
             disabled={!isConnected || stagedSpeed <= 0 || isApplying || commandPending}
-            title="Decrease by 5%"
+            title="Decrease 5%"
             aria-label="Decrease speed"
             style={{
-              width: 42,
-              height: 42,
+              width: 44,
+              height: 44,
               borderRadius: '50%',
-              border: '1px solid var(--border-subtle)',
-              background: '#FFFFFF',
+              border: '1px solid rgba(255, 255, 255, 0.12)',
+              background: 'rgba(20, 31, 56, 0.7)',
               boxShadow: 'var(--shadow-sm)',
               display: 'flex',
               alignItems: 'center',
@@ -139,30 +141,32 @@ export const SpeedDial: React.FC = () => {
             <Minus size={18} />
           </button>
 
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 3 }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
             <span className="tabular-nums" style={{
               fontFamily: 'var(--font-display)',
-              fontSize: '3.4rem',
+              fontSize: '3.8rem',
               fontWeight: 800,
-              color: !isConnected ? 'var(--text-muted)' : stagedSpeed > 0 ? 'var(--accent-primary)' : 'var(--text-muted)',
-              lineHeight: 1
+              color: !isConnected ? 'var(--text-muted)' : stagedSpeed > 0 ? 'var(--accent-primary)' : 'var(--text-secondary)',
+              lineHeight: 1,
+              letterSpacing: '-0.03em',
+              textShadow: isConnected && stagedSpeed > 0 ? '0 0 20px rgba(0, 242, 254, 0.35)' : 'none'
             }}>
               {isConnected ? stagedSpeed : '--'}
             </span>
-            <span style={{ fontSize: '1.4rem', color: 'var(--text-muted)', fontWeight: 600 }}>%</span>
+            <span style={{ fontSize: '1.5rem', color: 'var(--text-muted)', fontWeight: 700, fontFamily: 'var(--font-mono)' }}>%</span>
           </div>
 
           <button
             onClick={() => handleStep(5)}
             disabled={!isConnected || stagedSpeed >= 100 || isApplying || commandPending}
-            title="Increase by 5%"
+            title="Increase 5%"
             aria-label="Increase speed"
             style={{
-              width: 42,
-              height: 42,
+              width: 44,
+              height: 44,
               borderRadius: '50%',
-              border: '1px solid var(--border-subtle)',
-              background: '#FFFFFF',
+              border: '1px solid rgba(255, 255, 255, 0.12)',
+              background: 'rgba(20, 31, 56, 0.7)',
               boxShadow: 'var(--shadow-sm)',
               display: 'flex',
               alignItems: 'center',
@@ -176,8 +180,8 @@ export const SpeedDial: React.FC = () => {
           </button>
         </div>
 
-        {/* Smooth Slider */}
-        <div style={{ width: '100%', maxWidth: 380, marginTop: 18 }}>
+        {/* Smooth Linear Slider */}
+        <div style={{ width: '100%', maxWidth: 420, marginTop: 22 }}>
           <input
             type="range"
             min="0"
@@ -190,19 +194,19 @@ export const SpeedDial: React.FC = () => {
             style={{
               width: '100%',
               background: isConnected
-                ? `linear-gradient(to right, #0891B2 0%, #2563EB ${stagedSpeed}%, #E2E8F0 ${stagedSpeed}%, #E2E8F0 100%)`
-                : '#E2E8F0'
+                ? `linear-gradient(to right, #00F2FE 0%, #3B82F6 ${stagedSpeed}%, rgba(255, 255, 255, 0.08) ${stagedSpeed}%, rgba(255, 255, 255, 0.08) 100%)`
+                : 'rgba(255, 255, 255, 0.08)'
             }}
           />
         </div>
       </div>
 
-      {/* Preset Buttons */}
+      {/* Preset Pills */}
       <div style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(5, 1fr)',
         gap: 8,
-        marginTop: 4
+        marginTop: 6
       }}>
         {PRESETS.map(p => {
           const isSelected = isConnected && stagedSpeed === p.value;
@@ -212,14 +216,14 @@ export const SpeedDial: React.FC = () => {
               onClick={() => handlePresetClick(p.value)}
               disabled={!isConnected}
               style={{
-                padding: '8px 4px',
-                borderRadius: '8px',
+                padding: '9px 4px',
+                borderRadius: '10px',
                 border: isSelected ? '1px solid var(--accent-primary)' : '1px solid var(--border-subtle)',
-                background: isSelected ? 'var(--accent-primary-dim)' : '#FFFFFF',
+                background: isSelected ? 'var(--accent-primary-dim)' : 'rgba(20, 31, 56, 0.45)',
                 color: isSelected ? 'var(--accent-primary)' : 'var(--text-secondary)',
-                boxShadow: isSelected ? 'var(--shadow-sm)' : 'none',
-                fontWeight: isSelected ? 700 : 500,
-                fontSize: '0.8rem',
+                boxShadow: isSelected ? '0 0 16px rgba(0, 242, 254, 0.2)' : 'none',
+                fontWeight: isSelected ? 800 : 600,
+                fontSize: '0.82rem',
                 cursor: isConnected ? 'pointer' : 'not-allowed',
                 textAlign: 'center',
                 transition: 'all var(--transition-fast)'
@@ -233,25 +237,25 @@ export const SpeedDial: React.FC = () => {
 
       {/* Footer / Apply Action */}
       <div style={{
-        marginTop: 18,
+        marginTop: 20,
         paddingTop: 16,
         borderTop: '1px solid var(--border-subtle)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
         flexWrap: 'wrap',
-        gap: 10
+        gap: 12
       }}>
         {!isConnected ? (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.78rem', color: 'var(--color-error)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.76rem', color: 'var(--color-error)' }}>
             <AlertCircle size={15} />
-            <span>Connect hardware to adjust fan speed.</span>
+            <span>Connect hardware to adjust ceiling fan speed.</span>
           </div>
         ) : (
-          <span style={{ fontSize: '0.76rem', color: 'var(--text-secondary)' }}>
+          <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
             {hasUnappliedChanges
-              ? 'Click Apply to transmit speed to room fan.'
-              : isManual ? 'Fan running at selected setpoint.' : 'Autonomous automatic climate regulation active.'}
+              ? 'Click Apply to transmit PWM setpoint to ceiling fan.'
+              : isManual ? 'Ceiling fan operating at manual setpoint.' : 'Autonomous climate algorithm actively modulating airflow.'}
           </span>
         )}
 
@@ -259,29 +263,31 @@ export const SpeedDial: React.FC = () => {
           onClick={handleApplySpeed}
           disabled={!isConnected || isApplying || commandPending || (!hasUnappliedChanges && isManual)}
           style={{
-            background: isConnected && (hasUnappliedChanges || !isManual) ? 'var(--accent-primary)' : 'var(--surface-3)',
-            color: isConnected && (hasUnappliedChanges || !isManual) ? '#FFFFFF' : 'var(--text-muted)',
+            background: isConnected && (hasUnappliedChanges || !isManual) 
+              ? 'linear-gradient(135deg, #00F2FE 0%, #3B82F6 100%)' 
+              : 'var(--surface-3)',
+            color: isConnected && (hasUnappliedChanges || !isManual) ? '#070B14' : 'var(--text-muted)',
             border: 'none',
-            borderRadius: '9px',
-            padding: '9px 20px',
-            fontSize: '0.82rem',
-            fontWeight: 700,
+            borderRadius: '10px',
+            padding: '10px 22px',
+            fontSize: '0.84rem',
+            fontWeight: 800,
             cursor: isConnected && (hasUnappliedChanges || !isManual) ? 'pointer' : 'not-allowed',
             display: 'flex',
             alignItems: 'center',
-            gap: 6,
-            boxShadow: isConnected && (hasUnappliedChanges || !isManual) ? 'var(--shadow-sm)' : 'none',
+            gap: 7,
+            boxShadow: isConnected && (hasUnappliedChanges || !isManual) ? '0 0 20px rgba(0, 242, 254, 0.35)' : 'none',
             transition: 'all var(--transition-fast)'
           }}
         >
           {isApplying || commandPending ? (
             <>
-              <RefreshCw size={14} className="spin" />
-              <span>Updating Hardware...</span>
+              <RefreshCw size={15} className="spin" />
+              <span>Transmitting...</span>
             </>
           ) : (
             <>
-              <Check size={15} />
+              <Check size={16} />
               <span>Apply Speed</span>
             </>
           )}

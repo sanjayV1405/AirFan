@@ -3,7 +3,7 @@ import { useAirLoop } from '../context/AirLoopContext';
 import { TemperatureBandsBar } from '../components/controls/TemperatureBandsBar';
 import { ModeSelector } from '../components/controls/ModeSelector';
 import { TelemetryChart } from '../components/charts/TelemetryChart';
-import { Wind, Timer } from 'lucide-react';
+import { Wind, Timer, UserCheck, UserX } from 'lucide-react';
 
 export const ComfortZonePage: React.FC = () => {
   const { telemetry, config, connectionState } = useAirLoop();
@@ -17,22 +17,23 @@ export const ComfortZonePage: React.FC = () => {
   const timeRemainingSec = Math.max(0, timeoutSec - lastMotionSec);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 20, maxWidth: 1400, margin: '0 auto' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 24, maxWidth: 1440, margin: '0 auto' }}>
       <div>
         <h1 style={{
           fontFamily: 'var(--font-display)',
-          fontSize: '1.4rem',
+          fontSize: '1.45rem',
           fontWeight: 800,
           color: 'var(--text-primary)',
           display: 'flex',
           alignItems: 'center',
-          gap: 10
+          gap: 10,
+          letterSpacing: '-0.02em'
         }}>
-          <Wind size={22} color="var(--accent-primary)" />
-          <span>Room Comfort &amp; Climate</span>
+          <Wind size={24} color="var(--accent-primary)" />
+          <span>Room Comfort &amp; Presence</span>
         </h1>
-        <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginTop: 4 }}>
-          Autonomous thermal management and presence-based energy savings.
+        <p style={{ fontSize: '0.84rem', color: 'var(--text-secondary)', marginTop: 4 }}>
+          Autonomous thermal climate regulation and motion-based power-saving policies.
         </p>
       </div>
 
@@ -43,72 +44,73 @@ export const ComfortZonePage: React.FC = () => {
 
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-        gap: 16
+        gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))',
+        gap: 18
       }}>
         {/* Presence & Energy Saving Card */}
-        <div className="glass-panel" style={{ padding: '22px', borderRadius: 16 }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div className="glass-panel" style={{ padding: '24px', borderRadius: 18 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <div style={{
-                width: 32, height: 32, borderRadius: 8,
-                background: 'rgba(5, 150, 105, 0.08)',
+                width: 36, height: 36, borderRadius: 10,
+                background: 'rgba(16, 185, 129, 0.12)',
+                border: '1px solid rgba(16, 185, 129, 0.28)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 color: 'var(--color-success)'
               }}>
                 <Timer size={18} />
               </div>
-              <h3 style={{ fontSize: '0.98rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+              <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
                 Presence &amp; Energy Savings
               </h3>
             </div>
             <span style={{
               fontSize: '0.74rem',
-              fontWeight: 700,
-              padding: '3px 8px',
-              borderRadius: 6,
+              fontWeight: 800,
+              padding: '4px 10px',
+              borderRadius: 8,
               background: !isConnected ? 'var(--surface-3)' : isOccupied ? 'var(--color-success-dim)' : 'var(--accent-amber-dim)',
               color: !isConnected ? 'var(--text-muted)' : isOccupied ? 'var(--color-success)' : 'var(--accent-amber)',
-              border: `1px solid ${!isConnected ? 'var(--border-subtle)' : isOccupied ? 'rgba(5, 150, 105, 0.25)' : 'rgba(217, 119, 6, 0.25)'}`
+              border: `1px solid ${!isConnected ? 'var(--border-subtle)' : isOccupied ? 'rgba(16, 185, 129, 0.3)' : 'rgba(245, 158, 11, 0.3)'}`
             }}>
-              {!isConnected ? 'Offline' : isOccupied ? 'Room Occupied' : 'Room Empty'}
+              {!isConnected ? 'Offline' : isOccupied ? 'Room Occupied' : 'Room Vacant'}
             </span>
           </div>
 
           <div style={{
-            background: 'var(--surface-2)',
+            background: 'rgba(11, 17, 32, 0.65)',
             border: '1px solid var(--border-subtle)',
-            padding: '16px',
-            borderRadius: 12
+            padding: '18px',
+            borderRadius: 14
           }}>
-            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+            <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
               Energy-Saving Inactivity Countdown
             </div>
             <div className="tabular-nums" style={{
               fontFamily: 'var(--font-mono)',
-              fontSize: '1.7rem',
+              fontSize: '2rem',
               fontWeight: 800,
               color: !isConnected ? 'var(--text-muted)' : isOccupied ? 'var(--color-success)' : 'var(--accent-amber)',
-              marginTop: 2
+              marginTop: 4
             }}>
               {!isConnected 
                 ? '--:--' 
                 : isOccupied 
-                  ? 'Motion Active' 
+                  ? 'Motion Active (Reset)' 
                   : `${Math.floor(timeRemainingSec / 60)}m ${timeRemainingSec % 60}s`}
             </div>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: 6, lineHeight: 1.4 }}>
-              When the room is vacant for {config.occupancyTimeoutMinutes} minutes, the fan automatically lowers to {config.emptyRoomSpeed}% to conserve electricity.
+            <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: 8, lineHeight: 1.45 }}>
+              After {config.occupancyTimeoutMinutes} minutes of detected vacancy, the room fan automatically throttles down to {config.emptyRoomSpeed}% speed to save power.
             </div>
           </div>
         </div>
 
-        {/* Real-Time Temperature Log */}
-        <div className="glass-panel" style={{ padding: '22px', borderRadius: 16 }}>
-          <h3 style={{ fontSize: '0.98rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>
-            Temperature History
+        {/* Real-Time Temperature History Chart */}
+        <div className="glass-panel" style={{ padding: '24px', borderRadius: 18 }}>
+          <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 14, letterSpacing: '-0.02em' }}>
+            Room Temperature Log
           </h3>
-          <TelemetryChart type="temperature" height={180} />
+          <TelemetryChart type="temperature" height={190} />
         </div>
       </div>
     </div>
