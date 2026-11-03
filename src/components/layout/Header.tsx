@@ -1,25 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useAirLoop } from '../../context/AirLoopContext';
-import { WifiOff, Settings, RefreshCw, Cpu } from 'lucide-react';
+import { WifiOff, Settings, RefreshCw, Clock } from 'lucide-react';
 
 export const Header: React.FC = () => {
-  const {
-    connectionState,
-    lastSuccessfulUpdate,
-    pingLatency,
-    reconnect,
-    setActiveNav
-  } = useAirLoop();
-
-  const [relativeTime, setRelativeTime] = useState<string>('never');
+  const { connectionState, lastSuccessfulUpdate, pingLatency, reconnect, setActiveNav } = useAirLoop();
+  const [relativeTime, setRelativeTime] = useState<string>('waiting for connection');
   const [isReconnecting, setIsReconnecting] = useState<boolean>(false);
 
   useEffect(() => {
     const update = () => {
-      if (!lastSuccessfulUpdate) {
-        setRelativeTime('waiting for connection');
-        return;
-      }
+      if (!lastSuccessfulUpdate) { setRelativeTime('waiting for connection'); return; }
       const s = Math.floor((Date.now() - lastSuccessfulUpdate) / 1000);
       if (s < 2) setRelativeTime('just now');
       else if (s < 60) setRelativeTime(`${s}s ago`);
@@ -33,178 +23,236 @@ export const Header: React.FC = () => {
   const handleReconnect = async () => {
     setIsReconnecting(true);
     await reconnect();
-    setTimeout(() => setIsReconnecting(false), 500);
+    setTimeout(() => setIsReconnecting(false), 600);
   };
 
   const isConnected = connectionState === 'connected';
+  const isConnecting = connectionState === 'connecting';
 
   return (
     <header style={{
       background: 'var(--header-bg)',
-      backdropFilter: 'blur(20px)',
-      WebkitBackdropFilter: 'blur(20px)',
+      backdropFilter: 'blur(16px)',
+      WebkitBackdropFilter: 'blur(16px)',
       borderBottom: '1px solid var(--header-border)',
       position: 'sticky',
       top: 0,
-      zIndex: 30,
-      padding: '0 26px',
-      height: 68,
+      zIndex: 100,
+      height: 64,
+      padding: '0 24px',
       display: 'flex',
       alignItems: 'center',
-      transition: 'all var(--transition-normal)'
     }}>
       <div style={{
-        maxWidth: 1600,
+        maxWidth: 1440,
         width: '100%',
         margin: '0 auto',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        gap: 16
+        gap: 16,
       }}>
 
-        {/* Brand: AIRLOOP with Refined Ventilation Icon */}
-        <div 
+        {/* ── Brand ──────────────────────────────────────────── */}
+        <button
           onClick={() => setActiveNav('overview')}
-          style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer', userSelect: 'none' }}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 11,
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            padding: 0,
+            userSelect: 'none',
+          }}
         >
+          {/* Logo Mark */}
           <div style={{
-            width: 40, height: 40,
-            borderRadius: 12,
-            background: 'linear-gradient(135deg, #00F2FE 0%, #3B82F6 100%)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 0 20px rgba(0, 242, 254, 0.35)',
-            border: '1px solid rgba(255, 255, 255, 0.2)'
+            width: 38,
+            height: 38,
+            borderRadius: 11,
+            background: 'linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 2px 10px rgba(8, 127, 140, 0.28)',
+            flexShrink: 0,
           }}>
-            <svg width="24" height="24" viewBox="0 0 32 32" fill="none">
-              <circle cx="16" cy="16" r="13" stroke="#070B14" strokeWidth="1.75" strokeDasharray="3 3" opacity="0.65" />
-              <path d="M16 4 A12 12 0 0 1 28 16 A6 6 0 0 0 22 16 A6 6 0 0 1 16 10 Z" fill="#070B14" />
-              <path d="M16 28 A12 12 0 0 1 4 16 A6 6 0 0 0 10 16 A6 6 0 0 1 16 22 Z" fill="#070B14" opacity="0.85" />
-              <circle cx="16" cy="16" r="3.5" fill="#070B14" />
+            <svg width="22" height="22" viewBox="0 0 32 32" fill="none">
+              {/* Airflow vane: two curved blades */}
+              <circle cx="16" cy="16" r="12" stroke="rgba(255,255,255,0.35)" strokeWidth="1.2" strokeDasharray="2.5 2.5" />
+              <path d="M16 5 A11 11 0 0 1 27 16 A5.5 5.5 0 0 0 21.5 16 A5.5 5.5 0 0 1 16 10.5 Z" fill="white" opacity="0.95"/>
+              <path d="M16 27 A11 11 0 0 1 5 16 A5.5 5.5 0 0 0 10.5 16 A5.5 5.5 0 0 1 16 21.5 Z" fill="white" opacity="0.70"/>
+              <circle cx="16" cy="16" r="3" fill="white"/>
             </svg>
           </div>
 
-          <div>
+          {/* Brand text */}
+          <div style={{ textAlign: 'left' }}>
             <div style={{
               fontFamily: 'var(--font-display)',
-              fontSize: '1.35rem',
+              fontSize: '1.2rem',
               fontWeight: 800,
               letterSpacing: '-0.03em',
               color: 'var(--text-primary)',
-              lineHeight: 1
+              lineHeight: 1.1,
             }}>
               AIRLOOP
             </div>
             <div style={{
-              fontSize: '0.68rem',
-              fontWeight: 700,
+              fontSize: '0.65rem',
+              fontWeight: 600,
               color: 'var(--accent-primary)',
-              letterSpacing: '0.06em',
+              letterSpacing: '0.07em',
               textTransform: 'uppercase',
-              marginTop: 3
+              marginTop: 1,
             }}>
               Smart Climate Control
             </div>
           </div>
-        </div>
+        </button>
 
-        {/* Status & Quick Actions */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-          
-          {/* Connection Status Pill */}
+        {/* ── Right: Status + Actions ────────────────────────── */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+
+          {/* Connection Status */}
           {isConnected ? (
-            <div
-              title={`Live hardware stream ${relativeTime}`}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 8,
-                background: 'var(--color-success-dim)',
-                border: '1px solid rgba(16, 185, 129, 0.35)',
-                color: 'var(--color-success)',
-                padding: '6px 14px', borderRadius: 999,
-                fontSize: '0.78rem', fontWeight: 700,
-                boxShadow: '0 0 14px rgba(16, 185, 129, 0.2)'
-              }}
-            >
-              <div className="live-indicator" style={{ width: 7, height: 7, borderRadius: '50%', backgroundColor: 'var(--color-success)', boxShadow: '0 0 8px #10B981' }} />
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 7,
+              background: 'var(--color-success-bg)',
+              border: '1px solid rgba(26, 158, 106, 0.22)',
+              color: 'var(--color-success)',
+              padding: '5px 12px',
+              borderRadius: 'var(--radius-full)',
+              fontSize: '0.78rem',
+              fontWeight: 600,
+            }}>
+              <div
+                className="live-indicator"
+                style={{
+                  width: 6,
+                  height: 6,
+                  borderRadius: '50%',
+                  backgroundColor: 'var(--color-success)',
+                  flexShrink: 0,
+                }}
+              />
               <span>Hardware Connected</span>
               {pingLatency !== null && (
-                <span style={{ opacity: 0.8, fontSize: '0.7rem', fontFamily: 'var(--font-mono)' }}>
-                  · {pingLatency}ms
-                </span>
+                <span style={{ opacity: 0.7, fontSize: '0.70rem' }}>· {pingLatency}ms</span>
               )}
+            </div>
+          ) : isConnecting ? (
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 7,
+              background: 'var(--color-info-dim)',
+              border: '1px solid rgba(57, 121, 216, 0.22)',
+              color: 'var(--color-info)',
+              padding: '5px 12px',
+              borderRadius: 'var(--radius-full)',
+              fontSize: '0.78rem',
+              fontWeight: 600,
+            }}>
+              <RefreshCw size={12} className="spin" />
+              <span>Connecting...</span>
             </div>
           ) : (
             <div style={{
-              display: 'flex', alignItems: 'center', gap: 8,
-              background: 'var(--color-error-dim)',
-              border: '1px solid rgba(239, 68, 68, 0.35)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 7,
+              background: 'var(--color-error-bg)',
+              border: '1px solid rgba(192, 57, 43, 0.22)',
               color: 'var(--color-error)',
-              padding: '6px 14px', borderRadius: 999,
-              fontSize: '0.78rem', fontWeight: 700,
-              boxShadow: '0 0 14px rgba(239, 68, 68, 0.15)'
+              padding: '5px 12px 5px 10px',
+              borderRadius: 'var(--radius-full)',
+              fontSize: '0.78rem',
+              fontWeight: 600,
             }}>
-              <WifiOff size={14} />
-              <span>Hardware Disconnected</span>
+              <WifiOff size={13} />
+              <span>Disconnected</span>
               <button
                 onClick={handleReconnect}
                 disabled={isReconnecting}
                 style={{
-                  background: 'rgba(239, 68, 68, 0.2)',
-                  border: '1px solid rgba(239, 68, 68, 0.35)',
-                  color: '#EF4444',
-                  borderRadius: 6,
+                  background: 'rgba(192, 57, 43, 0.12)',
+                  border: '1px solid rgba(192, 57, 43, 0.25)',
+                  color: 'var(--color-error)',
+                  borderRadius: 'var(--radius-xs)',
                   padding: '3px 8px',
-                  fontSize: '0.7rem',
-                  fontWeight: 700,
+                  fontSize: '0.68rem',
+                  fontWeight: 600,
                   cursor: isReconnecting ? 'wait' : 'pointer',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 4
+                  gap: 4,
+                  marginLeft: 2,
+                  transition: 'all var(--transition-fast)',
                 }}
               >
-                <RefreshCw size={11} className={isReconnecting ? 'spin' : ''} />
-                <span>{isReconnecting ? 'Connecting...' : 'Reconnect'}</span>
+                <RefreshCw size={10} className={isReconnecting ? 'spin' : ''} />
+                <span>{isReconnecting ? '…' : 'Retry'}</span>
               </button>
             </div>
           )}
 
-          {/* Last updated badge (desktop) */}
-          <div className="hidden-mobile" style={{
-            fontSize: '0.74rem',
-            color: 'var(--text-muted)',
-            fontFamily: 'var(--font-mono)'
-          }}>
-            {isConnected ? `Synced ${relativeTime}` : 'Offline'}
-          </div>
+          {/* Last updated — desktop only */}
+          {isConnected && (
+            <div
+              className="hidden-mobile"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 5,
+                fontSize: '0.74rem',
+                color: 'var(--text-muted)',
+                padding: '5px 10px',
+                borderRadius: 'var(--radius-sm)',
+                background: 'var(--bg-secondary)',
+                border: '1px solid var(--border-subtle)',
+              }}
+            >
+              <Clock size={12} />
+              <span>{relativeTime}</span>
+            </div>
+          )}
 
           {/* Settings Button */}
           <button
             onClick={() => setActiveNav('settings')}
-            title="System Settings"
-            aria-label="Settings"
+            title="Settings"
+            aria-label="Open settings"
             style={{
-              background: 'rgba(255, 255, 255, 0.05)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
+              width: 36,
+              height: 36,
+              borderRadius: 'var(--radius-sm)',
+              background: 'var(--btn-subtle-bg)',
+              border: '1px solid var(--btn-subtle-border)',
               color: 'var(--text-secondary)',
-              borderRadius: 11,
-              padding: '9px',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
               cursor: 'pointer',
-              boxShadow: 'var(--shadow-sm)',
-              transition: 'all var(--transition-fast)'
+              transition: 'all var(--transition-fast)',
+              boxShadow: 'var(--shadow-xs)',
             }}
             onMouseEnter={e => {
-              (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--accent-primary)';
-              (e.currentTarget as HTMLButtonElement).style.color = 'var(--accent-primary)';
-              (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 0 16px rgba(0, 242, 254, 0.25)';
+              (e.currentTarget as HTMLButtonElement).style.background = 'var(--btn-subtle-hover)';
+              (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--border-medium)';
+              (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-primary)';
             }}
             onMouseLeave={e => {
-              (e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(255, 255, 255, 0.1)';
+              (e.currentTarget as HTMLButtonElement).style.background = 'var(--btn-subtle-bg)';
+              (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--btn-subtle-border)';
               (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-secondary)';
-              (e.currentTarget as HTMLButtonElement).style.boxShadow = 'var(--shadow-sm)';
             }}
           >
-            <Settings size={18} />
+            <Settings size={17} />
           </button>
         </div>
       </div>

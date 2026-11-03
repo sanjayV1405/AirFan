@@ -9,7 +9,9 @@ import {
   Sliders, 
   Cpu, 
   Droplets, 
-  Wifi
+  Wifi,
+  Clock,
+  Sparkles
 } from 'lucide-react';
 
 export const ActivityTimeline: React.FC = () => {
@@ -28,7 +30,7 @@ export const ActivityTimeline: React.FC = () => {
   }, []);
 
   const handleClear = () => {
-    if (window.confirm('Are you sure you want to clear the activity history?')) {
+    if (window.confirm('Clear all recorded activity history?')) {
       historyService.clearEvents();
       refreshEvents();
     }
@@ -52,10 +54,32 @@ export const ActivityTimeline: React.FC = () => {
     return matchesCategory && matchesSearch;
   });
 
+  const getCategoryIcon = (category: string) => {
+    switch (category) {
+      case 'command': return <Sliders size={14} />;
+      case 'sensor': return <Cpu size={14} />;
+      case 'ventilation': return <Droplets size={14} />;
+      case 'system':
+      default:
+        return <Wifi size={14} />;
+    }
+  };
+
+  const getCategoryClass = (category: string) => {
+    switch (category) {
+      case 'command': return 'icon-container-blue';
+      case 'sensor': return 'icon-container-teal';
+      case 'ventilation': return 'icon-container-warning';
+      case 'system':
+      default:
+        return 'icon-container-neutral';
+    }
+  };
+
   return (
-    <div className="glass-panel" style={{
-      padding: '22px',
-      borderRadius: '16px',
+    <div className="card-solid" style={{
+      padding: '24px',
+      borderRadius: 'var(--radius-lg)',
       position: 'relative'
     }}>
       {/* Top Header & Actions */}
@@ -65,24 +89,16 @@ export const ActivityTimeline: React.FC = () => {
         justifyContent: 'space-between',
         flexWrap: 'wrap',
         gap: 12,
-        marginBottom: 16
+        marginBottom: 18
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{
-            width: 32, height: 32, borderRadius: 8,
-            background: 'rgba(8, 145, 178, 0.08)',
-            border: '1px solid var(--border-accent)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            color: 'var(--accent-primary)'
-          }}>
-            <History size={18} />
+          <div className="icon-container icon-container-teal" style={{ width: 34, height: 34 }}>
+            <History size={16} />
           </div>
           <div>
-            <h3 style={{ fontSize: '0.98rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-              Activity History
-            </h3>
-            <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-              Real-time hardware events and commands
+            <h3 className="section-heading">Event Timeline</h3>
+            <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
+              Real-time hardware status changes and automation triggers
             </span>
           </div>
         </div>
@@ -90,20 +106,14 @@ export const ActivityTimeline: React.FC = () => {
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <button
             onClick={handleExportEventsCsv}
+            className="btn-secondary"
             style={{
-              background: '#FFFFFF',
-              border: '1px solid var(--border-subtle)',
-              color: 'var(--text-secondary)',
-              boxShadow: 'var(--shadow-sm)',
-              borderRadius: 8,
-              padding: '6px 12px',
-              fontSize: '0.76rem',
-              fontWeight: 600,
               display: 'flex',
               alignItems: 'center',
               gap: 6,
-              cursor: 'pointer',
-              transition: 'all var(--transition-fast)'
+              fontSize: '0.78rem',
+              padding: '7px 14px',
+              borderRadius: 'var(--radius-sm)'
             }}
           >
             <Download size={13} /> Export CSV
@@ -112,15 +122,12 @@ export const ActivityTimeline: React.FC = () => {
           <button
             onClick={handleClear}
             title="Clear logs"
+            className="btn-secondary"
             style={{
-              background: 'var(--color-error-dim)',
-              border: '1px solid rgba(220, 38, 38, 0.2)',
+              padding: '7px 10px',
               color: 'var(--color-error)',
-              borderRadius: 8,
-              padding: '6px 10px',
-              fontSize: '0.76rem',
-              cursor: 'pointer',
-              transition: 'all var(--transition-fast)'
+              borderColor: 'rgba(192, 57, 43, 0.20)',
+              borderRadius: 'var(--radius-sm)'
             }}
           >
             <Trash2 size={14} />
@@ -135,118 +142,146 @@ export const ActivityTimeline: React.FC = () => {
         justifyContent: 'space-between',
         flexWrap: 'wrap',
         gap: 10,
-        marginBottom: 16
+        marginBottom: 18,
+        paddingBottom: 14,
+        borderBottom: '1px solid var(--border-subtle)'
       }}>
-        <div style={{ display: 'flex', gap: 6 }}>
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
           {[
             { id: 'all', label: 'All Events' },
             { id: 'command', label: 'Commands' },
             { id: 'sensor', label: 'Sensors' },
             { id: 'ventilation', label: 'Ventilation' },
             { id: 'system', label: 'System' }
-          ].map(c => (
-            <button
-              key={c.id}
-              onClick={() => setSelectedCategory(c.id)}
-              style={{
-                background: selectedCategory === c.id ? '#FFFFFF' : 'var(--surface-2)',
-                border: selectedCategory === c.id ? '1px solid var(--accent-primary)' : '1px solid var(--border-subtle)',
-                color: selectedCategory === c.id ? 'var(--accent-primary)' : 'var(--text-secondary)',
-                boxShadow: selectedCategory === c.id ? 'var(--shadow-sm)' : 'none',
-                borderRadius: 8,
-                padding: '5px 12px',
-                fontSize: '0.74rem',
-                fontWeight: 600,
-                cursor: 'pointer',
-                transition: 'all var(--transition-fast)'
-              }}
-            >
-              {c.label}
-            </button>
-          ))}
+          ].map(c => {
+            const isSel = selectedCategory === c.id;
+            return (
+              <button
+                key={c.id}
+                onClick={() => setSelectedCategory(c.id)}
+                style={{
+                  background: isSel ? 'var(--accent-primary-dim)' : 'var(--bg-secondary)',
+                  border: isSel ? '1px solid rgba(8, 127, 140, 0.30)' : '1px solid var(--border-medium)',
+                  color: isSel ? 'var(--accent-primary)' : 'var(--text-secondary)',
+                  borderRadius: 'var(--radius-sm)',
+                  padding: '6px 12px',
+                  fontSize: '0.76rem',
+                  fontWeight: isSel ? 600 : 500,
+                  cursor: 'pointer',
+                  transition: 'all var(--transition-fast)',
+                  fontFamily: 'var(--font-sans)',
+                  boxShadow: isSel ? 'var(--shadow-xs)' : 'none'
+                }}
+              >
+                {c.label}
+              </button>
+            );
+          })}
         </div>
 
-        <div style={{ position: 'relative', minWidth: 200 }}>
-          <Search size={14} color="var(--text-muted)" style={{ position: 'absolute', left: 10, top: 9 }} />
+        <div style={{ position: 'relative', minWidth: 220 }}>
+          <Search size={14} color="var(--text-muted)" style={{ position: 'absolute', left: 10, top: 10 }} />
           <input
             type="text"
             placeholder="Search events..."
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             style={{
-              background: '#FFFFFF',
-              border: '1px solid var(--border-subtle)',
-              borderRadius: 8,
-              padding: '6px 10px 6px 30px',
-              color: 'var(--text-primary)',
-              fontSize: '0.78rem',
-              width: '100%',
-              outline: 'none',
-              boxShadow: 'var(--shadow-sm)',
-              transition: 'all var(--transition-fast)'
+              padding: '7px 12px 7px 30px',
+              fontSize: '0.80rem',
+              width: '100%'
             }}
           />
         </div>
       </div>
 
-      {/* Event List */}
+      {/* Event Timeline List */}
       <div style={{
-        maxHeight: 420,
+        maxHeight: 460,
         overflowY: 'auto',
         display: 'flex',
         flexDirection: 'column',
-        gap: 8
+        gap: 10,
+        paddingRight: 4
       }}>
         {filteredEvents.length === 0 ? (
-          <div style={{ padding: '36px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.82rem' }}>
-            No activity events recorded yet. Connect hardware to begin monitoring.
+          <div style={{
+            padding: '40px 20px',
+            textAlign: 'center',
+            color: 'var(--text-muted)',
+            fontSize: '0.82rem',
+            background: 'var(--bg-secondary)',
+            borderRadius: 'var(--radius-md)',
+            border: '1px dashed var(--border-medium)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 8
+          }}>
+            <Sparkles size={20} color="var(--accent-primary)" />
+            <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>No Activity Recorded</span>
+            <span style={{ fontSize: '0.76rem', maxWidth: 300 }}>
+              Hardware commands, presence events, and ventilation cycles will automatically register here.
+            </span>
           </div>
         ) : (
           filteredEvents.map(evt => {
-            const timeStr = new Date(evt.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            const dateObj = new Date(evt.timestamp);
+            const timeStr = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
             
             return (
               <div
                 key={evt.id}
                 style={{
-                  background: '#FFFFFF',
-                  border: '1px solid var(--border-subtle)',
-                  borderRadius: 10,
-                  padding: '10px 14px',
+                  background: 'var(--surface-solid)',
+                  border: '1px solid var(--border-card)',
+                  borderRadius: 'var(--radius-md)',
+                  padding: '12px 16px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  gap: 12,
-                  boxShadow: '0 1px 2px rgba(15, 23, 42, 0.03)',
-                  transition: 'background var(--transition-fast)'
+                  gap: 14,
+                  boxShadow: 'var(--shadow-xs)',
+                  transition: 'all var(--transition-fast)'
+                }}
+                onMouseEnter={e => {
+                  (e.currentTarget as HTMLDivElement).style.borderColor = 'var(--border-strong)';
+                  (e.currentTarget as HTMLDivElement).style.boxShadow = 'var(--shadow-sm)';
+                }}
+                onMouseLeave={e => {
+                  (e.currentTarget as HTMLDivElement).style.borderColor = 'var(--border-card)';
+                  (e.currentTarget as HTMLDivElement).style.boxShadow = 'var(--shadow-xs)';
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <div style={{
-                    padding: 6,
-                    borderRadius: 8,
-                    background: evt.level === 'error' ? 'var(--color-error-dim)' : 'rgba(8, 145, 178, 0.08)',
-                    border: `1px solid ${evt.level === 'error' ? 'rgba(220, 38, 38, 0.25)' : 'var(--border-accent)'}`,
-                    color: evt.level === 'error' ? 'var(--color-error)' : 'var(--accent-primary)'
-                  }}>
-                    {evt.category === 'command' ? <Sliders size={14} /> :
-                     evt.category === 'sensor' ? <Cpu size={14} /> :
-                     evt.category === 'ventilation' ? <Droplets size={14} /> :
-                     <Wifi size={14} />}
+                  <div
+                    className={`icon-container ${getCategoryClass(evt.category)}`}
+                    style={{ width: 32, height: 32 }}
+                  >
+                    {getCategoryIcon(evt.category)}
                   </div>
 
                   <div>
-                    <div style={{ fontWeight: 700, fontSize: '0.84rem', color: 'var(--text-primary)' }}>
+                    <div style={{ fontWeight: 600, fontSize: '0.86rem', color: 'var(--text-primary)' }}>
                       {evt.title}
                     </div>
-                    <div style={{ fontSize: '0.74rem', color: 'var(--text-secondary)', marginTop: 1 }}>
+                    <div style={{ fontSize: '0.76rem', color: 'var(--text-secondary)', marginTop: 2, lineHeight: 1.4 }}>
                       {evt.message}
                     </div>
                   </div>
                 </div>
 
-                <div className="tabular-nums" style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', whiteSpace: 'nowrap' }}>
-                  {timeStr}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 5,
+                  fontSize: '0.74rem',
+                  color: 'var(--text-muted)',
+                  fontVariantNumeric: 'tabular-nums',
+                  whiteSpace: 'nowrap'
+                }}>
+                  <Clock size={12} />
+                  <span>{timeStr}</span>
                 </div>
               </div>
             );

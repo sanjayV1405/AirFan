@@ -5,127 +5,138 @@ import { Droplets } from 'lucide-react';
 export const MoistureIndicator: React.FC = () => {
   const { telemetry, connectionState } = useAirLoop();
   const isConnected = connectionState === 'connected';
-
   const currentHumidity = isConnected ? telemetry.wetZoneHumidityPercent : null;
   const baseline = isConnected ? telemetry.humidityBaselinePercent : null;
   const isVentilating = isConnected && telemetry.exhaustFanState;
 
-  const getMoistureStatus = () => {
-    if (!isConnected || currentHumidity === null) return 'Hardware Offline';
-    if (isVentilating) return 'Exhaust Active — Clearing';
-    if (currentHumidity > 70) return 'High Moisture Detected';
-    if (currentHumidity > 55) return 'Normal Humidity';
-    return 'Dry & Comfortable';
+  const getStatus = () => {
+    if (!isConnected || currentHumidity === null) return { label: 'Sensor Offline', color: 'var(--text-muted)', bg: 'var(--bg-secondary)' };
+    if (isVentilating) return { label: 'Ventilating', color: 'var(--color-warning)', bg: 'rgba(192, 123, 43, 0.09)' };
+    if (currentHumidity > 70) return { label: 'High Moisture', color: 'var(--color-error)', bg: 'var(--color-error-bg)' };
+    if (currentHumidity > 55) return { label: 'Normal', color: 'var(--color-success)', bg: 'var(--color-success-bg)' };
+    return { label: 'Dry & Comfortable', color: 'var(--accent-primary)', bg: 'var(--accent-primary-dim)' };
   };
 
+  const { label, color, bg } = getStatus();
+
+  const barColor = isVentilating
+    ? 'linear-gradient(90deg, #C07B2B 0%, #C0392B 100%)'
+    : 'linear-gradient(90deg, var(--accent-primary) 0%, var(--accent-secondary) 100%)';
+
   return (
-    <div className="glass-panel" style={{
-      padding: '24px',
-      borderRadius: '18px',
-      position: 'relative'
-    }}>
+    <div className="card-solid" style={{ padding: '22px', borderRadius: 'var(--radius-lg)' }}>
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{
-            width: 38, height: 38, borderRadius: 10,
-            background: 'rgba(56, 189, 248, 0.12)',
-            border: '1px solid rgba(56, 189, 248, 0.28)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            color: '#38BDF8',
-            boxShadow: '0 0 16px rgba(56, 189, 248, 0.15)'
-          }}>
-            <Droplets size={20} />
+          <div className="icon-container icon-container-teal" style={{ width: 36, height: 36 }}>
+            <Droplets size={18} />
           </div>
           <div>
-            <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
-              Humidity &amp; Moisture Dynamics
-            </h3>
-            <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
-              Real-time room moisture monitoring
-            </span>
+            <div className="section-heading">Humidity & Moisture</div>
+            <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: 1 }}>
+              Real-time moisture monitoring
+            </div>
           </div>
         </div>
 
         <span style={{
-          padding: '5px 12px',
-          borderRadius: 8,
+          padding: '4px 12px',
+          borderRadius: 'var(--radius-full)',
           fontSize: '0.74rem',
-          fontWeight: 800,
-          background: isVentilating 
-            ? 'var(--accent-amber-dim)' 
-            : isConnected ? 'var(--color-success-dim)' : 'var(--surface-3)',
-          color: isVentilating 
-            ? 'var(--accent-amber)' 
-            : isConnected ? 'var(--color-success)' : 'var(--text-muted)',
-          border: `1px solid ${isVentilating ? 'rgba(245, 158, 11, 0.35)' : 'var(--border-subtle)'}`,
-          boxShadow: isVentilating ? '0 0 14px rgba(245, 158, 11, 0.2)' : 'none'
+          fontWeight: 600,
+          background: bg,
+          color,
+          border: `1px solid ${color}28`,
         }}>
-          {getMoistureStatus()}
+          {label}
         </span>
       </div>
 
-      {/* 3 Metric Cards */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(3, 1fr)',
-        gap: 12,
-        marginBottom: 18
-      }}>
-        <div style={{ background: 'rgba(11, 17, 32, 0.65)', border: '1px solid var(--border-subtle)', padding: '14px 16px', borderRadius: 14 }}>
-          <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Current Humidity</div>
-          <div className="tabular-nums" style={{ fontSize: '1.7rem', fontWeight: 800, color: '#F8FAFC', marginTop: 3, fontFamily: 'var(--font-mono)' }}>
-            {currentHumidity !== null ? `${currentHumidity}%` : '--'}
+      {/* 3 metric cards */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 16 }}>
+        <div style={{
+          background: 'var(--bg-secondary)',
+          border: '1px solid var(--border-subtle)',
+          padding: '14px 14px 12px',
+          borderRadius: 'var(--radius-md)',
+        }}>
+          <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 500, marginBottom: 4 }}>Current</div>
+          <div className="tabular-nums" style={{
+            fontSize: '1.65rem',
+            fontWeight: 700,
+            color: 'var(--text-primary)',
+            lineHeight: 1,
+            fontFamily: 'var(--font-display)',
+          }}>
+            {currentHumidity !== null ? `${currentHumidity}%` : '—'}
           </div>
         </div>
 
-        <div style={{ background: 'rgba(11, 17, 32, 0.65)', border: '1px solid var(--border-subtle)', padding: '14px 16px', borderRadius: 14 }}>
-          <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Target Baseline</div>
-          <div className="tabular-nums" style={{ fontSize: '1.7rem', fontWeight: 800, color: 'var(--text-secondary)', marginTop: 3, fontFamily: 'var(--font-mono)' }}>
+        <div style={{
+          background: 'var(--bg-secondary)',
+          border: '1px solid var(--border-subtle)',
+          padding: '14px 14px 12px',
+          borderRadius: 'var(--radius-md)',
+        }}>
+          <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 500, marginBottom: 4 }}>Target</div>
+          <div className="tabular-nums" style={{
+            fontSize: '1.65rem',
+            fontWeight: 700,
+            color: 'var(--text-secondary)',
+            lineHeight: 1,
+            fontFamily: 'var(--font-display)',
+          }}>
             {baseline !== null ? `${baseline}%` : '50%'}
           </div>
         </div>
 
-        <div style={{ background: 'rgba(11, 17, 32, 0.65)', border: '1px solid var(--border-subtle)', padding: '14px 16px', borderRadius: 14 }}>
-          <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Ventilation Status</div>
+        <div style={{
+          background: 'var(--bg-secondary)',
+          border: '1px solid var(--border-subtle)',
+          padding: '14px 14px 12px',
+          borderRadius: 'var(--radius-md)',
+        }}>
+          <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 500, marginBottom: 4 }}>Exhaust</div>
           <div style={{
-            fontSize: '1.2rem',
-            fontWeight: 800,
-            color: isVentilating ? 'var(--accent-amber)' : 'var(--color-success)',
-            marginTop: 7,
-            letterSpacing: '-0.01em'
+            fontSize: '1.15rem',
+            fontWeight: 700,
+            color: isVentilating ? 'var(--color-warning)' : isConnected ? 'var(--color-success)' : 'var(--text-muted)',
+            lineHeight: 1,
+            marginTop: 6,
           }}>
-            {!isConnected ? 'Offline' : isVentilating ? 'Active' : 'Standby'}
+            {!isConnected ? '—' : isVentilating ? 'Active' : 'Standby'}
           </div>
         </div>
       </div>
 
-      {/* Progress Bar */}
+      {/* Progress bar */}
       <div style={{
-        background: 'rgba(11, 17, 32, 0.8)',
+        background: 'var(--bg-secondary)',
         height: 8,
         borderRadius: 4,
         overflow: 'hidden',
-        boxShadow: 'inset 0 1px 3px rgba(0, 0, 0, 0.6)'
+        border: '1px solid var(--border-subtle)',
       }}>
         <div style={{
           height: '100%',
           width: `${Math.min(100, currentHumidity ?? 0)}%`,
-          background: isVentilating 
-            ? 'linear-gradient(90deg, #F59E0B 0%, #EF4444 100%)' 
-            : 'linear-gradient(90deg, #00F2FE 0%, #3B82F6 100%)',
+          background: barColor,
           borderRadius: 4,
-          boxShadow: isVentilating ? '0 0 12px rgba(245, 158, 11, 0.5)' : '0 0 12px rgba(0, 242, 254, 0.4)',
-          transition: 'width var(--transition-normal)'
+          transition: 'width var(--transition-normal)',
         }} />
       </div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 5, fontSize: '0.66rem', color: 'var(--text-muted)' }}>
+        <span>0%</span>
+        <span>Comfortable ≤60%</span>
+        <span>100%</span>
+      </div>
 
-      <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)', marginTop: 12, lineHeight: 1.4 }}>
+      <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)', marginTop: 12, lineHeight: 1.5 }}>
         {isConnected
-          ? (isVentilating 
-              ? 'Exhaust ventilation fan is running to purge excess steam and restore clean airflow.'
-              : 'Room moisture levels are within comfortable bounds. Automatic moisture extraction on standby.')
-          : 'Waiting for live connection to humidity sensor...'}
+          ? (isVentilating
+            ? 'Exhaust fan is actively extracting moist air to restore comfortable levels.'
+            : 'Moisture is within range. Auto ventilation will activate if humidity rises suddenly.')
+          : 'Waiting for hardware connection to read humidity sensor.'}
       </div>
     </div>
   );

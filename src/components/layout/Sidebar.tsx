@@ -1,72 +1,65 @@
 import React from 'react';
 import { useAirLoop } from '../../context/AirLoopContext';
 import {
-  LayoutDashboard,
-  Wind,
-  Sliders,
-  Droplets,
-  Cpu,
-  History,
-  Settings,
-  Wifi,
-  WifiOff
+  LayoutDashboard, Wind, Sliders, Droplets, Cpu, History, Settings, Wifi, WifiOff
 } from 'lucide-react';
 
 interface NavItem {
   id: string;
   label: string;
-  icon: React.ComponentType<{ size: number; color?: string }>;
+  icon: React.ComponentType<{ size: number }>;
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { id: 'overview',  label: 'Overview',                icon: LayoutDashboard },
-  { id: 'comfort',   label: 'Room Comfort',            icon: Wind },
-  { id: 'fan',       label: 'Fan Control',             icon: Sliders },
-  { id: 'wetzone',   label: 'Humidity & Ventilation',  icon: Droplets },
-  { id: 'sensors',   label: 'Sensor Status',           icon: Cpu },
-  { id: 'history',   label: 'Activity History',        icon: History },
-  { id: 'settings',  label: 'Settings',                icon: Settings },
+  { id: 'overview',  label: 'Overview',              icon: LayoutDashboard },
+  { id: 'comfort',   label: 'Room Comfort',           icon: Wind },
+  { id: 'fan',       label: 'Fan Control',            icon: Sliders },
+  { id: 'wetzone',   label: 'Humidity & Ventilation', icon: Droplets },
+  { id: 'sensors',   label: 'Sensor Status',          icon: Cpu },
+  { id: 'history',   label: 'Activity History',       icon: History },
+  { id: 'settings',  label: 'Settings',               icon: Settings },
 ];
 
 export const Sidebar: React.FC = () => {
   const { activeNav, setActiveNav, telemetry, connectionState } = useAirLoop();
-
   const isConnected = connectionState === 'connected';
+  const fanRunning = isConnected && telemetry.fanRunningState === 'RUNNING' && telemetry.requestedFanSpeedPercent > 0;
+  const ventRunning = isConnected && telemetry.exhaustFanState;
 
   return (
     <aside
       className="hidden-mobile"
       style={{
-        width: 250,
+        width: 240,
         background: 'var(--sidebar-bg)',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
         borderRight: '1px solid var(--sidebar-border)',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'space-between',
-        padding: '24px 16px',
-        height: 'calc(100vh - 68px)',
+        padding: '20px 12px',
+        height: 'calc(100vh - 64px)',
         position: 'sticky',
-        top: 68,
+        top: 64,
         flexShrink: 0,
         zIndex: 20,
-        transition: 'all var(--transition-normal)'
       }}
     >
       <div>
+        {/* Nav group label */}
         <div style={{
-          fontSize: '0.68rem',
-          fontWeight: 800,
+          fontSize: '0.65rem',
+          fontWeight: 700,
           color: 'var(--text-muted)',
-          letterSpacing: '0.1em',
+          letterSpacing: '0.10em',
           textTransform: 'uppercase',
-          padding: '0 12px 16px 12px'
+          padding: '0 10px 12px 10px',
         }}>
-          Control Center
+          Navigation
         </div>
 
-        <nav style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+        <nav style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           {NAV_ITEMS.map(item => {
             const Icon = item.icon;
             const isActive = activeNav === item.id;
@@ -79,26 +72,26 @@ export const Sidebar: React.FC = () => {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  padding: '11px 14px',
-                  borderRadius: 12,
-                  background: isActive
-                    ? 'linear-gradient(90deg, rgba(0, 242, 254, 0.15) 0%, rgba(59, 130, 246, 0.08) 100%)'
-                    : 'transparent',
+                  padding: '9px 10px',
+                  borderRadius: 'var(--radius-md)',
+                  background: isActive ? 'rgba(8, 127, 140, 0.10)' : 'transparent',
                   border: isActive
-                    ? '1px solid rgba(0, 242, 254, 0.35)'
+                    ? '1px solid rgba(8, 127, 140, 0.22)'
                     : '1px solid transparent',
                   color: isActive ? 'var(--accent-primary)' : 'var(--text-secondary)',
                   cursor: 'pointer',
                   textAlign: 'left',
+                  fontFamily: 'var(--font-sans)',
+                  fontWeight: isActive ? 600 : 500,
+                  fontSize: '0.875rem',
                   transition: 'all var(--transition-fast)',
-                  fontWeight: isActive ? 800 : 600,
-                  fontSize: '0.86rem',
-                  boxShadow: isActive ? '0 0 20px rgba(0, 242, 254, 0.15)' : 'none'
+                  width: '100%',
+                  position: 'relative',
                 }}
                 onMouseEnter={e => {
                   if (!isActive) {
-                    (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255, 255, 255, 0.05)';
-                    (e.currentTarget as HTMLButtonElement).style.color = '#F8FAFC';
+                    (e.currentTarget as HTMLButtonElement).style.background = 'rgba(23, 38, 59, 0.05)';
+                    (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-primary)';
                   }
                 }}
                 onMouseLeave={e => {
@@ -108,32 +101,50 @@ export const Sidebar: React.FC = () => {
                   }
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <Icon size={18} color={isActive ? 'var(--accent-primary)' : 'var(--text-muted)'} />
+                {/* Active indicator bar */}
+                {isActive && (
+                  <div style={{
+                    position: 'absolute',
+                    left: 0,
+                    top: '20%',
+                    bottom: '20%',
+                    width: 3,
+                    borderRadius: 999,
+                    background: 'var(--accent-primary)',
+                  }} />
+                )}
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <Icon size={17} />
                   <span>{item.label}</span>
                 </div>
 
-                {item.id === 'fan' && isConnected && telemetry.fanRunningState === 'RUNNING' && telemetry.requestedFanSpeedPercent > 0 && (
+                {/* Fan speed badge */}
+                {item.id === 'fan' && fanRunning && (
                   <span style={{
-                    fontSize: '0.68rem', fontWeight: 800,
-                    color: '#070B14', background: 'var(--accent-primary)',
-                    padding: '2px 7px', borderRadius: 999,
-                    fontFamily: 'var(--font-mono)',
-                    boxShadow: '0 0 10px rgba(0, 242, 254, 0.4)'
+                    fontSize: '0.65rem',
+                    fontWeight: 700,
+                    color: 'var(--text-on-accent)',
+                    background: 'var(--accent-primary)',
+                    padding: '1px 6px',
+                    borderRadius: 'var(--radius-full)',
                   }}>
                     {telemetry.requestedFanSpeedPercent}%
                   </span>
                 )}
 
-                {item.id === 'wetzone' && isConnected && telemetry.exhaustFanState && (
+                {/* Ventilation active badge */}
+                {item.id === 'wetzone' && ventRunning && (
                   <span style={{
-                    fontSize: '0.65rem', fontWeight: 800,
-                    color: '#070B14', background: 'var(--accent-amber)',
-                    padding: '2px 7px', borderRadius: 999,
+                    fontSize: '0.60rem',
+                    fontWeight: 700,
+                    color: '#FFFFFF',
+                    background: 'var(--color-warning)',
+                    padding: '1px 6px',
+                    borderRadius: 'var(--radius-full)',
                     letterSpacing: '0.04em',
-                    boxShadow: '0 0 10px rgba(245, 158, 11, 0.4)'
                   }}>
-                    ACTIVE
+                    ON
                   </span>
                 )}
               </button>
@@ -142,47 +153,45 @@ export const Sidebar: React.FC = () => {
         </nav>
       </div>
 
-      {/* Hardware Connection Card */}
+      {/* ── Hardware Status Card (bottom of sidebar) ─────────── */}
       <div style={{
-        padding: '16px',
-        borderRadius: 14,
-        background: 'rgba(15, 23, 42, 0.75)',
-        border: '1px solid var(--border-subtle)',
-        boxShadow: 'var(--shadow-sm)',
-        transition: 'all var(--transition-normal)'
+        padding: '14px 12px',
+        borderRadius: 'var(--radius-md)',
+        background: 'var(--surface-1)',
+        border: '1px solid var(--border-card)',
+        boxShadow: 'var(--shadow-xs)',
       }}>
-        <div style={{
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          marginBottom: 10
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-            {isConnected ? <Wifi size={15} color="var(--color-success)" /> : <WifiOff size={15} color="var(--color-error)" />}
-            <span style={{ fontSize: '0.78rem', color: '#F8FAFC', fontWeight: 700 }}>
-              Device Node
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            {isConnected
+              ? <Wifi size={14} color="var(--color-success)" />
+              : <WifiOff size={14} color="var(--color-error)" />
+            }
+            <span style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+              ESP32 Device
             </span>
           </div>
-          <span style={{
-            fontSize: '0.65rem', padding: '2px 8px', borderRadius: 999, fontWeight: 800,
-            background: isConnected ? 'var(--color-success-dim)' : 'var(--color-error-dim)',
-            color: isConnected ? 'var(--color-success)' : 'var(--color-error)',
-            border: `1px solid ${isConnected ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`
-          }}>
+          <span className={`badge ${isConnected ? 'badge-success' : 'badge-error'}`} style={{ fontSize: '0.60rem' }}>
             {isConnected ? 'ONLINE' : 'OFFLINE'}
           </span>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, fontSize: '0.74rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
           <div>
-            <span style={{ color: 'var(--text-muted)' }}>Room </span>
-            <strong className="tabular-nums" style={{ color: '#F8FAFC', fontFamily: 'var(--font-mono)' }}>
-              {isConnected && telemetry.comfortTemperatureC !== null ? `${telemetry.comfortTemperatureC.toFixed(1)}°C` : '--'}
-            </strong>
+            <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginBottom: 1 }}>Room Temp</div>
+            <div className="tabular-nums" style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+              {isConnected && telemetry.comfortTemperatureC !== null
+                ? `${telemetry.comfortTemperatureC.toFixed(1)}°C`
+                : '—'}
+            </div>
           </div>
           <div>
-            <span style={{ color: 'var(--text-muted)' }}>Humidity </span>
-            <strong className="tabular-nums" style={{ color: '#F8FAFC', fontFamily: 'var(--font-mono)' }}>
-              {isConnected && telemetry.wetZoneHumidityPercent !== null ? `${telemetry.wetZoneHumidityPercent}%` : '--'}
-            </strong>
+            <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginBottom: 1 }}>Humidity</div>
+            <div className="tabular-nums" style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+              {isConnected && telemetry.wetZoneHumidityPercent !== null
+                ? `${telemetry.wetZoneHumidityPercent}%`
+                : '—'}
+            </div>
           </div>
         </div>
       </div>

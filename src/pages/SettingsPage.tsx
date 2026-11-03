@@ -44,7 +44,6 @@ export const SettingsPage: React.FC = () => {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaveSuccessMsg(null);
-
     const validation = ConfigService.validate(form);
     if (!validation.valid) {
       setValidationErrors(validation.errors);
@@ -52,222 +51,178 @@ export const SettingsPage: React.FC = () => {
     }
     setValidationErrors([]);
     setIsSaving(true);
-
     updateConfig(form);
-    if (isConnected) {
-      await saveConfigToDevice();
-    }
+    if (isConnected) await saveConfigToDevice();
     setIsSaving(false);
     setSaveSuccessMsg('Settings saved successfully.');
     setTimeout(() => setSaveSuccessMsg(null), 3500);
   };
 
+  const inputStyle: React.CSSProperties = {
+    width: '100%',
+    padding: '10px 14px',
+    fontSize: '0.90rem',
+    borderRadius: 'var(--radius-sm)',
+    border: '1px solid var(--border-medium)',
+    background: 'var(--surface-input)',
+    color: 'var(--text-primary)',
+    fontFamily: 'var(--font-sans)',
+    outline: 'none',
+    transition: 'border-color var(--transition-fast), box-shadow var(--transition-fast)',
+  };
+
+  const TABS = [
+    { id: 'preferences', label: 'Preferences', icon: Sliders },
+    { id: 'connection', label: 'Connection', icon: Wifi },
+    { id: 'diagnostics', label: 'Diagnostics', icon: Code },
+  ] as const;
+
+  const diagItems = [
+    { label: 'Room Temperature Input', value: 'GPIO 4 — DHT11 1-Wire Single Bus' },
+    { label: 'Wet Zone Moisture Input', value: 'GPIO 5 — DHT11 1-Wire Single Bus' },
+    { label: 'Motion Detection Input', value: 'GPIO 27 — HC-SR501 PIR Interrupt' },
+    { label: 'Ceiling Fan Output', value: 'GPIO 25 — IRLZ44N 25kHz LEDC PWM' },
+    { label: 'Exhaust Fan Output', value: 'GPIO 26 — Opto-Isolated Digital Relay' },
+    { label: 'Telemetry Polling', value: `Every ${form.pollingIntervalMs}ms` },
+  ];
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 24, maxWidth: 1000, margin: '0 auto' }}>
+    <div className="fade-in-up" style={{ display: 'flex', flexDirection: 'column', gap: 20, maxWidth: 900, margin: '0 auto' }}>
+
+      {/* Page header */}
       <div>
-        <h1 style={{
-          fontFamily: 'var(--font-display)',
-          fontSize: '1.45rem',
-          fontWeight: 800,
-          color: 'var(--text-primary)',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 10,
-          letterSpacing: '-0.02em'
-        }}>
-          <Settings size={24} color="var(--accent-primary)" />
-          <span>System Settings</span>
-        </h1>
-        <p style={{ fontSize: '0.84rem', color: 'var(--text-secondary)', marginTop: 4 }}>
-          Manage your indoor comfort boundaries, network connection parameters, and hardware drivers.
-        </p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div className="icon-container icon-container-teal" style={{ width: 38, height: 38 }}>
+            <Settings size={18} />
+          </div>
+          <div>
+            <h1 className="page-title">Settings</h1>
+            <p className="page-subtitle">Comfort thresholds, hardware connection, and device diagnostics</p>
+          </div>
+        </div>
       </div>
 
-      {/* Navigation Tabs */}
+      {/* Tab strip */}
       <div style={{
         display: 'flex',
-        gap: 6,
-        background: 'rgba(11, 17, 32, 0.8)',
-        padding: 4,
-        borderRadius: 14,
-        border: '1px solid var(--border-subtle)',
-        width: 'fit-content'
+        gap: 4,
+        background: 'var(--bg-secondary)',
+        padding: '4px',
+        borderRadius: 'var(--radius-md)',
+        border: '1px solid var(--border-medium)',
+        width: 'fit-content',
       }}>
-        <button
-          type="button"
-          onClick={() => setActiveTab('preferences')}
-          style={{
-            background: activeTab === 'preferences' ? 'var(--accent-primary-dim)' : 'transparent',
-            color: activeTab === 'preferences' ? 'var(--accent-primary)' : 'var(--text-secondary)',
-            border: activeTab === 'preferences' ? '1px solid var(--border-accent)' : '1px solid transparent',
-            boxShadow: activeTab === 'preferences' ? '0 0 16px rgba(0, 242, 254, 0.2)' : 'none',
-            borderRadius: 10,
-            padding: '8px 18px',
-            fontSize: '0.82rem',
-            fontWeight: 800,
-            cursor: 'pointer',
-            transition: 'all var(--transition-fast)'
-          }}
-        >
-          Comfort &amp; Preferences
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveTab('connection')}
-          style={{
-            background: activeTab === 'connection' ? 'var(--accent-primary-dim)' : 'transparent',
-            color: activeTab === 'connection' ? 'var(--accent-primary)' : 'var(--text-secondary)',
-            border: activeTab === 'connection' ? '1px solid var(--border-accent)' : '1px solid transparent',
-            boxShadow: activeTab === 'connection' ? '0 0 16px rgba(0, 242, 254, 0.2)' : 'none',
-            borderRadius: 10,
-            padding: '8px 18px',
-            fontSize: '0.82rem',
-            fontWeight: 800,
-            cursor: 'pointer',
-            transition: 'all var(--transition-fast)'
-          }}
-        >
-          Device Connection
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveTab('diagnostics')}
-          style={{
-            background: activeTab === 'diagnostics' ? 'var(--accent-primary-dim)' : 'transparent',
-            color: activeTab === 'diagnostics' ? 'var(--accent-primary)' : 'var(--text-secondary)',
-            border: activeTab === 'diagnostics' ? '1px solid var(--border-accent)' : '1px solid transparent',
-            boxShadow: activeTab === 'diagnostics' ? '0 0 16px rgba(0, 242, 254, 0.2)' : 'none',
-            borderRadius: 10,
-            padding: '8px 18px',
-            fontSize: '0.82rem',
-            fontWeight: 800,
-            cursor: 'pointer',
-            transition: 'all var(--transition-fast)'
-          }}
-        >
-          Advanced Diagnostics
-        </button>
+        {TABS.map(({ id, label, icon: Icon }) => {
+          const isActive = activeTab === id;
+          return (
+            <button
+              key={id}
+              type="button"
+              onClick={() => setActiveTab(id)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 7,
+                background: isActive ? '#FAFCFE' : 'transparent',
+                color: isActive ? 'var(--accent-primary)' : 'var(--text-secondary)',
+                border: isActive ? '1px solid var(--border-medium)' : '1px solid transparent',
+                boxShadow: isActive ? 'var(--shadow-xs)' : 'none',
+                borderRadius: 'calc(var(--radius-md) - 3px)',
+                padding: '8px 16px',
+                fontSize: '0.82rem',
+                fontWeight: isActive ? 600 : 500,
+                cursor: 'pointer',
+                transition: 'all var(--transition-fast)',
+                fontFamily: 'var(--font-sans)',
+              }}
+            >
+              <Icon size={14} />
+              {label}
+            </button>
+          );
+        })}
       </div>
 
-      <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+      <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+
+        {/* Validation errors */}
         {validationErrors.length > 0 && (
           <div style={{
-            background: 'var(--color-error-dim)',
-            border: '1px solid rgba(239, 68, 68, 0.3)',
-            borderRadius: 14,
+            background: 'var(--color-error-bg)',
+            border: '1px solid rgba(192, 57, 43, 0.25)',
+            borderRadius: 'var(--radius-md)',
             padding: '14px 18px',
-            color: '#EF4444',
-            fontSize: '0.84rem'
+            color: 'var(--color-error)',
+            fontSize: '0.84rem',
+            lineHeight: 1.6,
           }}>
-            {validationErrors.map((err, i) => (
-              <div key={i}>• {err}</div>
-            ))}
+            {validationErrors.map((err, i) => <div key={i}>• {err}</div>)}
           </div>
         )}
 
+        {/* Success message */}
         {saveSuccessMsg && (
           <div style={{
-            background: 'var(--color-success-dim)',
-            border: '1px solid rgba(16, 185, 129, 0.3)',
-            borderRadius: 14,
+            background: 'var(--color-success-bg)',
+            border: '1px solid rgba(26, 158, 106, 0.25)',
+            borderRadius: 'var(--radius-md)',
             padding: '14px 18px',
-            color: '#10B981',
+            color: 'var(--color-success)',
             fontSize: '0.86rem',
-            fontWeight: 800,
+            fontWeight: 600,
             display: 'flex',
             alignItems: 'center',
             gap: 8,
-            boxShadow: '0 0 16px rgba(16, 185, 129, 0.15)'
           }}>
-            <Check size={18} /> {saveSuccessMsg}
+            <Check size={16} /> {saveSuccessMsg}
           </div>
         )}
 
-        {/* Tab 1: Comfort & Preferences */}
+        {/* ── Tab 1: Comfort & Preferences ────────────────────── */}
         {activeTab === 'preferences' && (
           <>
-            <div className="glass-panel" style={{ padding: '24px', borderRadius: 18 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
-                <Sliders size={20} color="var(--accent-primary)" />
-                <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
-                  Comfort Temperature Boundaries (°C)
-                </h3>
+            <div className="card-solid" style={{ padding: '22px', borderRadius: 'var(--radius-lg)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                <Sliders size={17} color="var(--accent-primary)" />
+                <h3 className="section-heading">Comfort Temperature Boundaries</h3>
               </div>
-              <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: 18 }}>
-                Configure trigger temperatures for automatic fan speeds.
+              <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: 18 }}>
+                Temperature thresholds that trigger automatic fan speed changes.
               </p>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
-                <div>
-                  <label style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', display: 'block', marginBottom: 6, fontWeight: 700 }}>
-                    Cool Limit (&lt; Cool)
-                  </label>
-                  <input
-                    type="number"
-                    step="0.5"
-                    value={form.tempCoolMax}
-                    onChange={e => setForm({ ...form, tempCoolMax: Number(e.target.value) })}
-                    style={{
-                      width: '100%',
-                      padding: '10px 14px',
-                      fontSize: '0.9rem',
-                      fontFamily: 'var(--font-mono)'
-                    }}
-                  />
-                </div>
-
-                <div>
-                  <label style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', display: 'block', marginBottom: 6, fontWeight: 700 }}>
-                    Comfort Upper Bound
-                  </label>
-                  <input
-                    type="number"
-                    step="0.5"
-                    value={form.tempComfortMax}
-                    onChange={e => setForm({ ...form, tempComfortMax: Number(e.target.value) })}
-                    style={{
-                      width: '100%',
-                      padding: '10px 14px',
-                      fontSize: '0.9rem',
-                      fontFamily: 'var(--font-mono)'
-                    }}
-                  />
-                </div>
-
-                <div>
-                  <label style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', display: 'block', marginBottom: 6, fontWeight: 700 }}>
-                    Warm Upper Bound (Hot above)
-                  </label>
-                  <input
-                    type="number"
-                    step="0.5"
-                    value={form.tempWarmMax}
-                    onChange={e => setForm({ ...form, tempWarmMax: Number(e.target.value) })}
-                    style={{
-                      width: '100%',
-                      padding: '10px 14px',
-                      fontSize: '0.9rem',
-                      fontFamily: 'var(--font-mono)'
-                    }}
-                  />
-                </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
+                {[
+                  { label: 'Cool Limit (°C)', key: 'tempCoolMax', hint: 'Below this = Cool' },
+                  { label: 'Comfort Upper (°C)', key: 'tempComfortMax', hint: 'Below this = Comfortable' },
+                  { label: 'Warm Upper (°C)', key: 'tempWarmMax', hint: 'Above this = Hot' },
+                ].map(({ label, key, hint }) => (
+                  <div key={key}>
+                    <label style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', display: 'block', marginBottom: 6, fontWeight: 600 }}>
+                      {label}
+                    </label>
+                    <input
+                      type="number"
+                      step="0.5"
+                      value={(form as unknown as Record<string, number>)[key]}
+                      onChange={e => setForm({ ...form, [key]: Number(e.target.value) })}
+                      style={{ ...inputStyle, fontVariantNumeric: 'tabular-nums' }}
+                    />
+                    <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', marginTop: 4 }}>{hint}</div>
+                  </div>
+                ))}
               </div>
             </div>
 
-            <div className="glass-panel" style={{ padding: '24px', borderRadius: 18 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
-                <Clock size={20} color="var(--accent-primary)" />
-                <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
-                  Occupancy &amp; Power-Saving Policies
-                </h3>
+            <div className="card-solid" style={{ padding: '22px', borderRadius: 'var(--radius-lg)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                <Clock size={17} color="var(--accent-primary)" />
+                <h3 className="section-heading">Occupancy & Power-Saving</h3>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 16 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
                 <div>
-                  <label style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', display: 'block', marginBottom: 6, fontWeight: 700 }}>
-                    Vacancy Power-Saving Timer (minutes)
+                  <label style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', display: 'block', marginBottom: 6, fontWeight: 600 }}>
+                    Vacancy Timer (minutes)
                   </label>
                   <input
                     type="number"
@@ -275,17 +230,15 @@ export const SettingsPage: React.FC = () => {
                     max="60"
                     value={form.occupancyTimeoutMinutes}
                     onChange={e => setForm({ ...form, occupancyTimeoutMinutes: Number(e.target.value) })}
-                    style={{
-                      width: '100%',
-                      padding: '10px 14px',
-                      fontSize: '0.9rem',
-                      fontFamily: 'var(--font-mono)'
-                    }}
+                    style={inputStyle}
                   />
+                  <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', marginTop: 4 }}>
+                    Time before power-saving mode activates
+                  </div>
                 </div>
 
                 <div>
-                  <label style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', display: 'block', marginBottom: 6, fontWeight: 700 }}>
+                  <label style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', display: 'block', marginBottom: 6, fontWeight: 600 }}>
                     Empty Room Fan Speed (%)
                   </label>
                   <input
@@ -294,52 +247,44 @@ export const SettingsPage: React.FC = () => {
                     max="100"
                     value={form.emptyRoomSpeed}
                     onChange={e => setForm({ ...form, emptyRoomSpeed: Number(e.target.value) })}
-                    style={{
-                      width: '100%',
-                      padding: '10px 14px',
-                      fontSize: '0.9rem',
-                      fontFamily: 'var(--font-mono)'
-                    }}
+                    style={inputStyle}
                   />
+                  <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', marginTop: 4 }}>
+                    Fan speed when room is vacant
+                  </div>
                 </div>
               </div>
             </div>
           </>
         )}
 
-        {/* Tab 2: Device Connection */}
+        {/* ── Tab 2: Device Connection ─────────────────────────── */}
         {activeTab === 'connection' && (
-          <div className="glass-panel" style={{ padding: '24px', borderRadius: 18 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
-              <Wifi size={20} color="var(--accent-primary)" />
-              <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
-                ESP32 Hardware IP Address
-              </h3>
+          <div className="card-solid" style={{ padding: '22px', borderRadius: 'var(--radius-lg)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+              <Wifi size={17} color="var(--accent-primary)" />
+              <h3 className="section-heading">ESP32 Network Configuration</h3>
             </div>
-            <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: 18 }}>
-              Configure the network endpoint where your microcontroller serves its REST API endpoints.
+            <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: 18 }}>
+              Set the IP address where your ESP32 microcontroller serves its REST API.
             </p>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 16 }}>
               <div>
-                <label style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', display: 'block', marginBottom: 6, fontWeight: 700 }}>
+                <label style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', display: 'block', marginBottom: 6, fontWeight: 600 }}>
                   Device Name
                 </label>
                 <input
                   type="text"
                   value={form.deviceName}
                   onChange={e => setForm({ ...form, deviceName: e.target.value })}
-                  style={{
-                    width: '100%',
-                    padding: '10px 14px',
-                    fontSize: '0.9rem'
-                  }}
+                  style={inputStyle}
                 />
               </div>
 
               <div>
-                <label style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', display: 'block', marginBottom: 6, fontWeight: 700 }}>
-                  ESP32 Base URL (HTTP)
+                <label style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', display: 'block', marginBottom: 6, fontWeight: 600 }}>
+                  ESP32 Base URL
                 </label>
                 <div style={{ display: 'flex', gap: 8 }}>
                   <input
@@ -347,32 +292,24 @@ export const SettingsPage: React.FC = () => {
                     value={form.esp32BaseUrl}
                     onChange={e => setForm({ ...form, esp32BaseUrl: e.target.value })}
                     placeholder="http://192.168.1.100"
-                    style={{
-                      flex: 1,
-                      padding: '10px 14px',
-                      fontSize: '0.9rem',
-                      fontFamily: 'var(--font-mono)'
-                    }}
+                    style={{ ...inputStyle, flex: 1, fontVariantNumeric: 'tabular-nums' }}
                   />
                   <button
                     type="button"
                     onClick={handlePing}
                     disabled={isPinging}
+                    className="btn-secondary"
                     style={{
-                      background: 'rgba(255, 255, 255, 0.08)',
-                      border: '1px solid var(--border-subtle)',
-                      color: 'var(--text-primary)',
-                      borderRadius: 10,
-                      padding: '9px 18px',
-                      fontSize: '0.82rem',
-                      fontWeight: 800,
-                      cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: 6
+                      gap: 6,
+                      padding: '9px 16px',
+                      fontSize: '0.82rem',
+                      borderRadius: 'var(--radius-sm)',
+                      whiteSpace: 'nowrap',
                     }}
                   >
-                    {isPinging ? <RefreshCw size={14} className="spin" /> : <Radio size={15} />}
+                    {isPinging ? <RefreshCw size={14} className="spin" /> : <Radio size={14} />}
                     <span>Test Ping</span>
                   </button>
                 </div>
@@ -381,104 +318,74 @@ export const SettingsPage: React.FC = () => {
 
             {pingResult && (
               <div style={{
-                marginTop: 16,
+                marginTop: 14,
                 padding: '12px 16px',
-                borderRadius: 10,
-                background: pingResult.ok ? 'var(--color-success-dim)' : 'var(--color-error-dim)',
-                border: `1px solid ${pingResult.ok ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`,
+                borderRadius: 'var(--radius-sm)',
+                background: pingResult.ok ? 'var(--color-success-bg)' : 'var(--color-error-bg)',
+                border: `1px solid ${pingResult.ok ? 'rgba(26, 158, 106, 0.25)' : 'rgba(192, 57, 43, 0.25)'}`,
                 fontSize: '0.82rem',
-                color: pingResult.ok ? '#10B981' : '#EF4444',
-                fontFamily: 'var(--font-mono)'
+                color: pingResult.ok ? 'var(--color-success)' : 'var(--color-error)',
+                fontWeight: 600,
               }}>
                 {pingResult.ok 
-                  ? `✓ Device responsive (${pingResult.latencyMs}ms roundtrip latency).` 
-                  : `✗ Connection test failed: ${pingResult.error || 'Device unreachable. Check Wi-Fi.'}`}
+                  ? `✓ Device responsive (${pingResult.latencyMs}ms roundtrip).` 
+                  : `✗ Connection failed: ${pingResult.error || 'Device unreachable. Check Wi-Fi and IP.'}`}
               </div>
             )}
           </div>
         )}
 
-        {/* Tab 3: Advanced Diagnostics */}
+        {/* ── Tab 3: Diagnostics ───────────────────────────────── */}
         {activeTab === 'diagnostics' && (
-          <div className="glass-panel" style={{ padding: '24px', borderRadius: 18 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
-              <Code size={20} color="var(--accent-primary)" />
-              <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
-                Hardware Specifications &amp; Pinout
-              </h3>
+          <div className="card-solid" style={{ padding: '22px', borderRadius: 'var(--radius-lg)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+              <Code size={17} color="var(--accent-primary)" />
+              <h3 className="section-heading">Hardware Specifications & Pinout</h3>
             </div>
-            <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: 18 }}>
-              Technical architecture details of the physical microcontroller integration.
+            <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: 18 }}>
+              Read-only technical architecture of the ESP32 microcontroller integration.
             </p>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 14 }}>
-              <div style={{ background: 'rgba(11, 17, 32, 0.65)', padding: '14px', borderRadius: 12, border: '1px solid var(--border-subtle)' }}>
-                <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Room Temperature Input</span>
-                <div style={{ fontSize: '0.9rem', fontWeight: 800, color: '#F8FAFC', marginTop: 3 }}>
-                  GPIO 4 (DHT11 1-Wire Single Bus)
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 12 }}>
+              {diagItems.map(({ label, value }) => (
+                <div key={label} style={{
+                  background: 'var(--bg-secondary)',
+                  padding: '14px 16px',
+                  borderRadius: 'var(--radius-md)',
+                  border: '1px solid var(--border-subtle)',
+                }}>
+                  <div style={{ fontSize: '0.70rem', color: 'var(--text-muted)', fontWeight: 500, marginBottom: 4 }}>{label}</div>
+                  <div style={{ fontSize: '0.84rem', fontWeight: 600, color: 'var(--text-primary)' }}>{value}</div>
                 </div>
-              </div>
-
-              <div style={{ background: 'rgba(11, 17, 32, 0.65)', padding: '14px', borderRadius: 12, border: '1px solid var(--border-subtle)' }}>
-                <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Wet Zone Moisture Input</span>
-                <div style={{ fontSize: '0.9rem', fontWeight: 800, color: '#F8FAFC', marginTop: 3 }}>
-                  GPIO 5 (DHT11 1-Wire Single Bus)
-                </div>
-              </div>
-
-              <div style={{ background: 'rgba(11, 17, 32, 0.65)', padding: '14px', borderRadius: 12, border: '1px solid var(--border-subtle)' }}>
-                <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Motion Detection Input</span>
-                <div style={{ fontSize: '0.9rem', fontWeight: 800, color: '#F8FAFC', marginTop: 3 }}>
-                  GPIO 27 (HC-SR501 PIR Digital Interrupt)
-                </div>
-              </div>
-
-              <div style={{ background: 'rgba(11, 17, 32, 0.65)', padding: '14px', borderRadius: 12, border: '1px solid var(--border-subtle)' }}>
-                <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Room Ceiling Fan Output</span>
-                <div style={{ fontSize: '0.9rem', fontWeight: 800, color: '#F8FAFC', marginTop: 3 }}>
-                  GPIO 25 (IRLZ44N 25kHz LEDC PWM)
-                </div>
-              </div>
-
-              <div style={{ background: 'rgba(11, 17, 32, 0.65)', padding: '14px', borderRadius: 12, border: '1px solid var(--border-subtle)' }}>
-                <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Exhaust Ventilation Output</span>
-                <div style={{ fontSize: '0.9rem', fontWeight: 800, color: '#F8FAFC', marginTop: 3 }}>
-                  GPIO 26 (Opto-Isolated Digital Relay)
-                </div>
-              </div>
-
-              <div style={{ background: 'rgba(11, 17, 32, 0.65)', padding: '14px', borderRadius: 12, border: '1px solid var(--border-subtle)' }}>
-                <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Telemetry Polling Frequency</span>
-                <div style={{ fontSize: '0.9rem', fontWeight: 800, color: '#F8FAFC', marginTop: 3 }}>
-                  Every {form.pollingIntervalMs}ms
-                </div>
-              </div>
+              ))}
             </div>
           </div>
         )}
 
         {/* Save Button */}
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 6 }}>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 4 }}>
           <button
             type="submit"
             disabled={isSaving || commandPending}
             style={{
-              background: 'linear-gradient(135deg, #00F2FE 0%, #3B82F6 100%)',
-              color: '#070B14',
+              background: 'linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%)',
+              color: '#FFFFFF',
               border: 'none',
-              borderRadius: 12,
-              padding: '12px 28px',
-              fontSize: '0.9rem',
-              fontWeight: 800,
+              borderRadius: 'var(--radius-sm)',
+              padding: '11px 28px',
+              fontSize: '0.90rem',
+              fontWeight: 600,
               cursor: isSaving ? 'wait' : 'pointer',
               display: 'flex',
               alignItems: 'center',
               gap: 8,
-              boxShadow: '0 0 24px rgba(0, 242, 254, 0.35)',
-              transition: 'all var(--transition-fast)'
+              boxShadow: 'var(--shadow-teal)',
+              transition: 'all var(--transition-fast)',
+              fontFamily: 'var(--font-sans)',
+              opacity: (isSaving || commandPending) ? 0.7 : 1,
             }}
           >
-            {isSaving ? <RefreshCw size={16} className="spin" /> : <Save size={18} />}
+            {isSaving ? <RefreshCw size={16} className="spin" /> : <Save size={16} />}
             <span>Save Settings</span>
           </button>
         </div>

@@ -6,17 +6,7 @@ import { SpeedDial } from '../components/controls/SpeedDial';
 import { TemperatureBandsBar } from '../components/controls/TemperatureBandsBar';
 import { ExhaustFanControl } from '../components/wetzone/ExhaustFanControl';
 import { TelemetryChart } from '../components/charts/TelemetryChart';
-import { 
-  Thermometer, 
-  Droplets, 
-  UserCheck, 
-  UserX, 
-  Wind, 
-  Power, 
-  ArrowRight, 
-  Activity, 
-  AlertCircle
-} from 'lucide-react';
+import { Thermometer, Droplets, UserCheck, UserX, Wind, Power, ArrowRight, Activity, AlertCircle } from 'lucide-react';
 
 export const OverviewPage: React.FC = () => {
   const { telemetry, connectionState, setActiveNav } = useAirLoop();
@@ -24,49 +14,58 @@ export const OverviewPage: React.FC = () => {
 
   const temp = isConnected ? telemetry.comfortTemperatureC : null;
   const humidity = isConnected ? telemetry.comfortHumidityPercent : null;
-  const isOccupied = isConnected ? telemetry.occupancyDetected : false;
+  const isOccupied = isConnected && telemetry.occupancyDetected;
   const fanRunning = isConnected && telemetry.fanRunningState === 'RUNNING' && telemetry.requestedFanSpeedPercent > 0;
-  const ventilationRunning = isConnected && telemetry.exhaustFanState;
+  const ventRunning = isConnected && telemetry.exhaustFanState;
+
+  const getTempLabel = () => {
+    if (temp === null) return 'Sensor offline';
+    if (temp < 26) return 'Cool';
+    if (temp <= 29) return 'Comfortable';
+    if (temp <= 32) return 'Warm';
+    return 'Hot';
+  };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 24, maxWidth: 1440, margin: '0 auto' }}>
-      
-      {/* Offline Hardware Banner */}
+    <div className="fade-in-up" style={{ display: 'flex', flexDirection: 'column', gap: 20, maxWidth: 1400, margin: '0 auto' }}>
+
+      {/* ── Offline Banner ─────────────────────────────────────── */}
       {!isConnected && (
         <div style={{
-          background: 'rgba(239, 68, 68, 0.12)',
-          border: '1px solid rgba(239, 68, 68, 0.35)',
-          borderRadius: 16,
-          padding: '16px 20px',
+          background: 'rgba(192, 57, 43, 0.07)',
+          border: '1px solid rgba(192, 57, 43, 0.22)',
+          borderRadius: 'var(--radius-lg)',
+          padding: '14px 18px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
           flexWrap: 'wrap',
           gap: 12,
-          boxShadow: '0 0 20px rgba(239, 68, 68, 0.15)'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <AlertCircle size={22} color="#EF4444" />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <AlertCircle size={18} color="var(--color-error)" />
             <div>
-              <div style={{ fontWeight: 800, fontSize: '0.92rem', color: '#F8FAFC' }}>
+              <div style={{ fontWeight: 600, fontSize: '0.88rem', color: 'var(--text-primary)' }}>
                 Hardware Disconnected
               </div>
-              <div style={{ fontSize: '0.78rem', color: '#FCA5A5', marginTop: 2 }}>
-                Live sensors and fan controls will activate automatically when your ESP32 device connects.
+              <div style={{ fontSize: '0.76rem', color: 'var(--text-secondary)', marginTop: 2 }}>
+                Live sensors and fan controls will activate automatically when your ESP32 connects.
               </div>
             </div>
           </div>
           <button
             onClick={() => setActiveNav('settings')}
             style={{
-              background: 'rgba(239, 68, 68, 0.25)',
-              border: '1px solid rgba(239, 68, 68, 0.45)',
-              color: '#F8FAFC',
-              borderRadius: 10,
-              padding: '8px 18px',
-              fontSize: '0.8rem',
-              fontWeight: 800,
-              cursor: 'pointer'
+              background: 'rgba(192, 57, 43, 0.10)',
+              border: '1px solid rgba(192, 57, 43, 0.28)',
+              color: 'var(--color-error)',
+              borderRadius: 'var(--radius-sm)',
+              padding: '7px 16px',
+              fontSize: '0.80rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              fontFamily: 'var(--font-sans)',
+              transition: 'all var(--transition-fast)',
             }}
           >
             Configure Device IP
@@ -74,252 +73,197 @@ export const OverviewPage: React.FC = () => {
         </div>
       )}
 
-      {/* 5 Distinct Primary Overview Cards */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-        gap: 16
-      }}>
-        {/* 1. Room Temperature */}
-        <div className="glass-panel" style={{ padding: '20px', borderRadius: 16 }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-            <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
-              Room Temperature
+      {/* ── 5 Status Cards ─────────────────────────────────────── */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: 14 }}>
+
+        {/* Room Temperature */}
+        <div className="card-solid card-enter" style={{ padding: '18px', borderRadius: 'var(--radius-lg)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+            <span style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              Temperature
             </span>
-            <div style={{
-              width: 32, height: 32, borderRadius: 8,
-              background: 'rgba(56, 189, 248, 0.14)',
-              border: '1px solid rgba(56, 189, 248, 0.3)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              color: '#38BDF8'
-            }}>
-              <Thermometer size={17} />
+            <div className="icon-container icon-container-blue" style={{ width: 30, height: 30 }}>
+              <Thermometer size={15} />
             </div>
           </div>
           <div className="tabular-nums" style={{
             fontFamily: 'var(--font-display)',
-            fontSize: '2.4rem',
-            fontWeight: 800,
-            color: '#F8FAFC',
+            fontSize: '2.2rem',
+            fontWeight: 700,
+            color: 'var(--text-primary)',
             lineHeight: 1,
-            letterSpacing: '-0.03em'
+            letterSpacing: '-0.03em',
           }}>
-            {temp !== null ? `${temp.toFixed(1)}°C` : '--.-'}
+            {temp !== null ? `${temp.toFixed(1)}°` : '—'}
           </div>
-          <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)', marginTop: 8 }}>
-            {temp !== null ? (temp < 26 ? 'Cool environment' : temp <= 29 ? 'Comfortable climate' : 'Warm room') : 'Sensor offline'}
-          </div>
+          <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: 6 }}>{getTempLabel()}</div>
         </div>
 
-        {/* 2. Humidity Level */}
-        <div className="glass-panel" style={{ padding: '20px', borderRadius: 16 }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-            <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
-              Humidity Level
+        {/* Humidity */}
+        <div className="card-solid card-enter" style={{ padding: '18px', borderRadius: 'var(--radius-lg)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+            <span style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              Humidity
             </span>
-            <div style={{
-              width: 32, height: 32, borderRadius: 8,
-              background: 'rgba(0, 242, 254, 0.14)',
-              border: '1px solid rgba(0, 242, 254, 0.3)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              color: 'var(--accent-primary)'
-            }}>
-              <Droplets size={17} />
+            <div className="icon-container icon-container-teal" style={{ width: 30, height: 30 }}>
+              <Droplets size={15} />
             </div>
           </div>
           <div className="tabular-nums" style={{
             fontFamily: 'var(--font-display)',
-            fontSize: '2.4rem',
-            fontWeight: 800,
-            color: '#F8FAFC',
+            fontSize: '2.2rem',
+            fontWeight: 700,
+            color: 'var(--text-primary)',
             lineHeight: 1,
-            letterSpacing: '-0.03em'
+            letterSpacing: '-0.03em',
           }}>
-            {humidity !== null ? `${humidity}%` : '--%'}
+            {humidity !== null ? `${humidity}%` : '—'}
           </div>
-          <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)', marginTop: 8 }}>
-            {humidity !== null ? (humidity <= 60 ? 'Optimal moisture' : 'Elevated moisture') : 'Sensor offline'}
+          <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: 6 }}>
+            {humidity !== null ? (humidity <= 60 ? 'Optimal' : 'Elevated moisture') : 'Sensor offline'}
           </div>
         </div>
 
-        {/* 3. Room Occupancy */}
-        <div className="glass-panel" style={{ padding: '20px', borderRadius: 16 }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-            <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
-              Room Occupancy
+        {/* Occupancy */}
+        <div className="card-solid card-enter" style={{ padding: '18px', borderRadius: 'var(--radius-lg)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+            <span style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              Occupancy
             </span>
-            <div style={{
-              width: 32, height: 32, borderRadius: 8,
-              background: isOccupied ? 'rgba(16, 185, 129, 0.14)' : 'var(--surface-3)',
-              border: `1px solid ${isOccupied ? 'rgba(16, 185, 129, 0.3)' : 'var(--border-subtle)'}`,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              color: isOccupied ? 'var(--color-success)' : 'var(--text-muted)'
-            }}>
-              {isOccupied ? <UserCheck size={17} /> : <UserX size={17} />}
+            <div className={`icon-container ${isOccupied ? 'icon-container-success' : 'icon-container-neutral'}`} style={{ width: 30, height: 30 }}>
+              {isOccupied ? <UserCheck size={15} /> : <UserX size={15} />}
             </div>
           </div>
           <div style={{
             fontFamily: 'var(--font-display)',
-            fontSize: '1.6rem',
-            fontWeight: 800,
-            color: !isConnected ? 'var(--text-muted)' : isOccupied ? 'var(--color-success)' : '#F8FAFC',
+            fontSize: '1.5rem',
+            fontWeight: 700,
+            color: !isConnected ? 'var(--text-muted)' : isOccupied ? 'var(--color-success)' : 'var(--text-primary)',
             lineHeight: 1.2,
-            letterSpacing: '-0.02em'
+            letterSpacing: '-0.02em',
           }}>
-            {!isConnected ? 'Offline' : isOccupied ? 'Occupied' : 'Vacant'}
+            {!isConnected ? '—' : isOccupied ? 'Occupied' : 'Vacant'}
           </div>
-          <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)', marginTop: 8 }}>
-            {isConnected ? (isOccupied ? 'Presence detected' : 'Room is empty') : 'Sensor offline'}
+          <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: 6 }}>
+            {isConnected ? (isOccupied ? 'Motion detected' : 'Room is empty') : 'Sensor offline'}
           </div>
         </div>
 
-        {/* 4. Ceiling Fan Status */}
-        <div className="glass-panel" style={{ padding: '20px', borderRadius: 16 }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-            <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+        {/* Ceiling Fan */}
+        <div className="card-solid card-enter" style={{ padding: '18px', borderRadius: 'var(--radius-lg)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+            <span style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
               Ceiling Fan
             </span>
-            <div style={{
-              width: 32, height: 32, borderRadius: 8,
-              background: fanRunning ? 'var(--accent-primary-dim)' : 'var(--surface-3)',
-              border: `1px solid ${fanRunning ? 'var(--border-accent)' : 'var(--border-subtle)'}`,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              color: fanRunning ? 'var(--accent-primary)' : 'var(--text-muted)'
-            }}>
-              <Wind size={17} />
+            <div className={`icon-container ${fanRunning ? 'icon-container-teal' : 'icon-container-neutral'}`} style={{ width: 30, height: 30 }}>
+              <Wind size={15} />
             </div>
           </div>
           <div style={{
             fontFamily: 'var(--font-display)',
-            fontSize: '1.6rem',
-            fontWeight: 800,
-            color: fanRunning ? 'var(--accent-primary)' : '#F8FAFC',
+            fontSize: '1.5rem',
+            fontWeight: 700,
+            color: fanRunning ? 'var(--accent-primary)' : 'var(--text-primary)',
             lineHeight: 1.2,
-            letterSpacing: '-0.02em'
+            letterSpacing: '-0.02em',
           }}>
-            {!isConnected ? 'Offline' : fanRunning ? `${telemetry.requestedFanSpeedPercent}% Speed` : 'Stopped'}
+            {!isConnected ? '—' : fanRunning ? `${telemetry.requestedFanSpeedPercent}%` : 'Stopped'}
           </div>
-          <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)', marginTop: 8 }}>
-            {isConnected ? (telemetry.activeMode === 'auto' ? 'Auto modulation' : 'Manual setpoint') : 'Hardware offline'}
+          <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: 6 }}>
+            {isConnected ? (telemetry.activeMode === 'auto' ? 'Auto mode' : 'Manual') : 'Hardware offline'}
           </div>
         </div>
 
-        {/* 5. Ventilation Status */}
-        <div className="glass-panel" style={{ padding: '20px', borderRadius: 16 }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-            <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
-              Ventilation Fan
+        {/* Exhaust Fan */}
+        <div className="card-solid card-enter" style={{ padding: '18px', borderRadius: 'var(--radius-lg)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+            <span style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              Ventilation
             </span>
-            <div style={{
-              width: 32, height: 32, borderRadius: 8,
-              background: ventilationRunning ? 'var(--accent-amber-dim)' : 'var(--surface-3)',
-              border: `1px solid ${ventilationRunning ? 'rgba(245, 158, 11, 0.35)' : 'var(--border-subtle)'}`,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              color: ventilationRunning ? 'var(--accent-amber)' : 'var(--text-muted)'
-            }}>
-              <Power size={17} />
+            <div className={`icon-container ${ventRunning ? 'icon-container-warning' : 'icon-container-neutral'}`} style={{ width: 30, height: 30 }}>
+              <Power size={15} />
             </div>
           </div>
           <div style={{
             fontFamily: 'var(--font-display)',
-            fontSize: '1.6rem',
-            fontWeight: 800,
-            color: ventilationRunning ? 'var(--accent-amber)' : '#F8FAFC',
+            fontSize: '1.5rem',
+            fontWeight: 700,
+            color: ventRunning ? 'var(--color-warning)' : 'var(--text-primary)',
             lineHeight: 1.2,
-            letterSpacing: '-0.02em'
+            letterSpacing: '-0.02em',
           }}>
-            {!isConnected ? 'Offline' : ventilationRunning ? 'Extracting' : 'Standby'}
+            {!isConnected ? '—' : ventRunning ? 'Active' : 'Standby'}
           </div>
-          <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)', marginTop: 8 }}>
-            {isConnected ? (ventilationRunning ? 'Clearing steam' : 'Moisture balanced') : 'Hardware offline'}
+          <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: 6 }}>
+            {isConnected ? (ventRunning ? 'Extracting moisture' : 'Balanced') : 'Hardware offline'}
           </div>
         </div>
       </div>
 
-      {/* Mode Selector */}
+      {/* ── Mode Selector ───────────────────────────────────────── */}
       <ModeSelector />
 
-      {/* Ceiling Room Fan Section */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))',
-        gap: 18
-      }}>
-        {/* Realistic Ceiling Fan Model */}
-        <div className="glass-panel" style={{
-          padding: '26px',
-          borderRadius: 18,
+      {/* ── Fan Visualization + Speed Controls ─────────────────── */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 16 }}>
+        <div className="card-solid" style={{
+          padding: '24px',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          minHeight: 330
+          minHeight: 300,
         }}>
-          <FanVisualization size={250} showLabels={true} />
+          <div style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 16 }}>
+            Room Ceiling Fan
+          </div>
+          <FanVisualization size={230} showLabels={true} />
         </div>
 
-        {/* Ceiling Fan Speed Dial */}
         <SpeedDial />
       </div>
 
-      {/* Temperature Response Spectrum & Exhaust Fan Control */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))',
-        gap: 18
-      }}>
+      {/* ── Comfort Range + Exhaust Fan ─────────────────────────── */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 16 }}>
         <TemperatureBandsBar />
         <ExhaustFanControl />
       </div>
 
-      {/* Real-Time Telemetry Stream Chart */}
-      <div className="glass-panel" style={{
-        padding: '24px',
-        borderRadius: '18px'
-      }}>
+      {/* ── Live Telemetry Chart ────────────────────────────────── */}
+      <div className="card-solid" style={{ padding: '22px', borderRadius: 'var(--radius-lg)' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{
-              width: 36, height: 36, borderRadius: 10,
-              background: 'var(--accent-primary-dim)',
-              border: '1px solid var(--border-accent)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              color: 'var(--accent-primary)'
-            }}>
-              <Activity size={18} />
+            <div className="icon-container icon-container-teal" style={{ width: 34, height: 34 }}>
+              <Activity size={16} />
             </div>
             <div>
-              <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
-                Live Temperature Telemetry
-              </h3>
-              <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
-                Real-time streaming points from ESP32 DHT11 sensor
-              </span>
+              <div className="section-heading">Live Temperature</div>
+              <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: 1 }}>
+                Real-time stream from ESP32 sensor
+              </div>
             </div>
           </div>
-
           <button
             onClick={() => setActiveNav('history')}
             style={{
-              background: 'rgba(255, 255, 255, 0.05)',
-              border: '1px solid var(--border-subtle)',
+              display: 'flex', alignItems: 'center', gap: 5,
+              background: 'var(--bg-secondary)',
+              border: '1px solid var(--border-medium)',
               color: 'var(--accent-primary)',
-              borderRadius: 8,
-              padding: '6px 14px',
+              borderRadius: 'var(--radius-sm)',
+              padding: '6px 13px',
               fontSize: '0.78rem',
-              fontWeight: 800,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 5,
-              cursor: 'pointer'
+              fontWeight: 600,
+              cursor: 'pointer',
+              transition: 'all var(--transition-fast)',
+              fontFamily: 'var(--font-sans)',
             }}
           >
-            <span>Activity History</span>
-            <ArrowRight size={14} />
+            <span>History</span>
+            <ArrowRight size={13} />
           </button>
         </div>
 
-        <TelemetryChart type="temperature" height={220} />
+        <TelemetryChart type="temperature" height={210} />
       </div>
     </div>
   );

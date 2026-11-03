@@ -1,118 +1,130 @@
-/* AIRLOOP — Premium Midnight Climate Control Design Tokens */
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+/* ═══════════════════════════════════════════════════════════════
+   AIRLOOP — Soft Arctic Light Theme Design Tokens
+   Premium Smart Climate Control Product
+   ═══════════════════════════════════════════════════════════════ */
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 
-  /* Primary Midnight Canvas */
-  --bg-primary:    #070B14;          /* Deep Midnight Navy */
-  --bg-secondary:  #0B1120;          /* Sub-layer Navy Canvas */
-  --bg-tertiary:   #0F172A;          /* Slate Base */
+  /* ── Primary Page Backgrounds ──────────────────────────────── */
+  --bg-primary:   #EEF3F8;          /* Soft Misty Blue-Gray */
+  --bg-secondary: #E5ECF4;          /* Subtle Cool Gray-Blue */
+  --bg-tertiary:  #DDE6F0;          /* Slightly deeper tint */
 
-  /* Frosted Glass Layers */
-  --surface-1:     rgba(15, 23, 42, 0.72);  /* Frosted Glass Card */
-  --surface-2:     rgba(20, 31, 56, 0.65);  /* Nested Surface */
-  --surface-3:     rgba(30, 41, 69, 0.60);  /* Track / Switch Base */
-  --surface-input: rgba(11, 17, 32, 0.85);  /* Form Input */
-  --surface-hover: rgba(56, 189, 248, 0.08); /* Interactive Hover */
-  --surface-glass: rgba(15, 23, 42, 0.82);
+  /* ── Surface Layers ────────────────────────────────────────── */
+  --surface-1:        rgba(250, 252, 254, 0.92);  /* Card: near-white ivory */
+  --surface-2:        rgba(240, 246, 252, 0.85);  /* Nested / grouped surface */
+  --surface-3:        rgba(229, 236, 244, 0.70);  /* Track / toggle base */
+  --surface-input:    #FAFCFE;                    /* Form inputs */
+  --surface-hover:    rgba(8, 127, 140, 0.06);    /* Interactive hover tint */
+  --surface-glass:    rgba(250, 252, 254, 0.75);  /* Glassmorphism surface */
+  --surface-solid:    #FAFCFE;                    /* Fully solid card */
 
-  /* Layout Chrome */
-  --header-bg:        rgba(7, 11, 20, 0.85);
-  --header-border:    rgba(56, 189, 248, 0.12);
-  --sidebar-bg:       rgba(11, 17, 32, 0.85);
-  --sidebar-card-bg:  rgba(15, 23, 42, 0.80);
-  --sidebar-border:   rgba(255, 255, 255, 0.06);
-  --mobilenav-bg:     rgba(7, 11, 20, 0.94);
-  --mobilenav-border: rgba(56, 189, 248, 0.12);
+  /* ── Layout Chrome ─────────────────────────────────────────── */
+  --header-bg:        rgba(250, 252, 254, 0.88);
+  --header-border:    rgba(23, 38, 59, 0.09);
+  --sidebar-bg:       rgba(245, 249, 253, 0.92);
+  --sidebar-border:   rgba(23, 38, 59, 0.08);
+  --mobilenav-bg:     rgba(250, 252, 254, 0.96);
+  --mobilenav-border: rgba(23, 38, 59, 0.10);
 
-  /* Accents — Electric Cyan & Soft Royal/Indigo */
-  --accent-primary:      #00F2FE;        /* Electric Cyan (Primary Brand) */
-  --accent-primary-hover:#38BDF8;        /* Sky Blue */
-  --accent-primary-dim:  rgba(0, 242, 254, 0.12);
-  --accent-primary-glow: rgba(0, 242, 254, 0.24);
+  /* ── Accent Colors — Sophisticated Teal & Sky Blue ─────────── */
+  --accent-primary:       #087F8C;           /* Sophisticated Teal */
+  --accent-primary-hover: #066B77;           /* Darker teal on hover */
+  --accent-primary-light: rgba(8, 127, 140, 0.10);
+  --accent-primary-dim:   rgba(8, 127, 140, 0.12);
+  --accent-primary-glow:  rgba(8, 127, 140, 0.20);
 
-  --accent-secondary:    #3B82F6;        /* Royal Blue */
-  --accent-secondary-dim:rgba(59, 130, 246, 0.14);
-  --accent-violet:       #818CF8;        /* Soft Violet Highlight */
-  --accent-violet-dim:   rgba(129, 140, 248, 0.12);
+  --accent-secondary:     #3979D8;           /* Clear Sky Blue */
+  --accent-secondary-dim: rgba(57, 121, 216, 0.12);
 
-  --accent-amber:        #F59E0B;        /* Warm Amber */
-  --accent-amber-dim:    rgba(245, 158, 11, 0.14);
+  --accent-teal-pale:     rgba(8, 127, 140, 0.08);
 
-  /* Typography */
-  --text-primary:    #F8FAFC;          /* Clean Bright White */
-  --text-secondary:  #94A3B8;          /* Muted Slate Gray */
-  --text-muted:      #64748B;          /* Soft Cool Slate */
-  --text-accent:     #00F2FE;          /* Glowing Cyan Text */
-  --text-on-accent:  #070B14;          /* Midnight contrast on cyan */
+  /* ── Typography ────────────────────────────────────────────── */
+  --text-primary:    #17263B;          /* Deep Ink Navy */
+  --text-secondary:  #617187;          /* Muted Slate */
+  --text-muted:      #8FA3BB;          /* Lighter hint text */
+  --text-accent:     #087F8C;          /* Teal text accent */
+  --text-on-accent:  #FFFFFF;          /* Text over teal / blue buttons */
+  --text-on-dark:    #FAFCFE;
 
-  /* Status Colors */
-  --color-success:     #10B981;        /* Connected / Good (Emerald) */
-  --color-success-dim: rgba(16, 185, 129, 0.14);
-  --color-warning:     #F59E0B;        /* Attention / Warm (Amber) */
-  --color-warning-dim: rgba(245, 158, 11, 0.14);
-  --color-error:       #EF4444;        /* Disconnected / Fault (Red) */
-  --color-error-dim:   rgba(239, 68, 68, 0.14);
-  --color-info:        #38BDF8;
-  --color-info-dim:    rgba(56, 189, 248, 0.14);
+  /* ── Status Semantic Colors ────────────────────────────────── */
+  --color-success:      #1A9E6A;
+  --color-success-dim:  rgba(26, 158, 106, 0.10);
+  --color-success-bg:   rgba(26, 158, 106, 0.08);
+  --color-warning:      #C07B2B;
+  --color-warning-dim:  rgba(192, 123, 43, 0.12);
+  --color-warning-bg:   rgba(192, 123, 43, 0.08);
+  --color-error:        #C0392B;
+  --color-error-dim:    rgba(192, 57, 43, 0.12);
+  --color-error-bg:     rgba(192, 57, 43, 0.08);
+  --color-info:         #3979D8;
+  --color-info-dim:     rgba(57, 121, 216, 0.12);
 
-  /* Luminous Borders */
-  --border-subtle:  rgba(255, 255, 255, 0.07);
-  --border-medium:  rgba(255, 255, 255, 0.12);
-  --border-accent:  rgba(0, 242, 254, 0.28);
-  --border-strong:  rgba(255, 255, 255, 0.18);
-  --border-card:    rgba(255, 255, 255, 0.08);
+  /* ── Borders ───────────────────────────────────────────────── */
+  --border-subtle:  rgba(23, 38, 59, 0.07);
+  --border-medium:  rgba(23, 38, 59, 0.12);
+  --border-strong:  rgba(23, 38, 59, 0.18);
+  --border-accent:  rgba(8, 127, 140, 0.30);
+  --border-card:    rgba(23, 38, 59, 0.09);
 
-  /* Deep Layered Shadows */
-  --shadow-sm:   0 2px 8px rgba(0, 0, 0, 0.40);
-  --shadow-md:   0 8px 24px -4px rgba(0, 0, 0, 0.55), 0 2px 6px -1px rgba(0, 0, 0, 0.30);
-  --shadow-lg:   0 20px 48px -8px rgba(0, 0, 0, 0.70);
-  --shadow-glow: 0 0 24px rgba(0, 242, 254, 0.18);
-  --shadow-blue: 0 0 24px rgba(59, 130, 246, 0.20);
+  /* ── Refined Shadows (Light Theme) ────────────────────────── */
+  --shadow-xs:  0 1px 3px rgba(23, 38, 59, 0.06);
+  --shadow-sm:  0 2px 8px rgba(23, 38, 59, 0.08), 0 1px 3px rgba(23, 38, 59, 0.05);
+  --shadow-md:  0 4px 16px rgba(23, 38, 59, 0.10), 0 2px 6px rgba(23, 38, 59, 0.06);
+  --shadow-lg:  0 12px 32px rgba(23, 38, 59, 0.12), 0 4px 12px rgba(23, 38, 59, 0.07);
+  --shadow-xl:  0 24px 56px rgba(23, 38, 59, 0.14);
+  --shadow-inset: inset 0 1px 2px rgba(23, 38, 59, 0.06);
+  --shadow-teal:  0 4px 16px rgba(8, 127, 140, 0.18);
 
-  /* Fan Visualizer Theming */
-  --fan-housing-bg:          radial-gradient(circle at 40% 35%, #1E293B 0%, #0F172A 70%, #070B14 100%);
-  --fan-housing-border:      rgba(255, 255, 255, 0.10);
-  --fan-housing-border-run:  #00F2FE;
-  --fan-blade-grad-start:    #475569;
-  --fan-blade-grad-mid:      #334155;
-  --fan-blade-grad-end:      #1E293B;
-  --fan-hub-start:           #334155;
-  --fan-hub-end:             #0F172A;
-  --fan-center-badge-bg:     rgba(11, 17, 32, 0.92);
-  --fan-center-badge-border: rgba(0, 242, 254, 0.25);
-  --fan-tick-inactive:       rgba(255, 255, 255, 0.10);
+  /* ── Fan Visualizer (Light Theme Surfaces) ─────────────────── */
+  --fan-housing-bg:          radial-gradient(circle at 40% 35%, #E5ECF4 0%, #D4DFE8 65%, #C8D6E4 100%);
+  --fan-housing-border:      rgba(23, 38, 59, 0.14);
+  --fan-housing-border-run:  #087F8C;
+  --fan-blade-grad-start:    #617187;
+  --fan-blade-grad-mid:      #4A5B70;
+  --fan-blade-grad-end:      #334155;
+  --fan-hub-start:           #8FA3BB;
+  --fan-hub-end:             #4A5B70;
+  --fan-center-badge-bg:     rgba(250, 252, 254, 0.96);
+  --fan-center-badge-border: rgba(8, 127, 140, 0.25);
+  --fan-tick-inactive:       rgba(23, 38, 59, 0.12);
 
-  /* Charts */
-  --chart-grid:           rgba(255, 255, 255, 0.05);
-  --chart-axis:           #64748B;
-  --chart-tooltip-bg:     rgba(11, 17, 32, 0.95);
-  --chart-tooltip-border: rgba(0, 242, 254, 0.30);
-  --chart-tooltip-text:   #F8FAFC;
+  /* ── Charts ────────────────────────────────────────────────── */
+  --chart-grid:           rgba(23, 38, 59, 0.06);
+  --chart-axis:           #8FA3BB;
+  --chart-tooltip-bg:     rgba(250, 252, 254, 0.98);
+  --chart-tooltip-border: rgba(8, 127, 140, 0.25);
+  --chart-tooltip-text:   #17263B;
 
-  /* Ambient Mesh Lighting */
-  --ambient-glow-1: rgba(0, 242, 254, 0.06);
-  --ambient-glow-2: rgba(59, 130, 246, 0.05);
-  --ambient-glow-3: rgba(129, 140, 248, 0.04);
+  /* ── Ambient Subtle Background Gradients ───────────────────── */
+  --ambient-glow-1: rgba(8, 127, 140, 0.04);
+  --ambient-glow-2: rgba(57, 121, 216, 0.03);
+  --ambient-glow-3: rgba(8, 127, 140, 0.03);
 
-  /* Button Translucents */
-  --btn-subtle-bg:     rgba(255, 255, 255, 0.04);
-  --btn-subtle-border: rgba(255, 255, 255, 0.09);
-  --btn-subtle-hover:  rgba(255, 255, 255, 0.08);
+  /* ── Button Surface Tokens ─────────────────────────────────── */
+  --btn-subtle-bg:     rgba(23, 38, 59, 0.04);
+  --btn-subtle-border: rgba(23, 38, 59, 0.10);
+  --btn-subtle-hover:  rgba(23, 38, 59, 0.07);
 
-  /* Fonts */
-  --font-sans:    'Manrope', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-display: 'Manrope', var(--font-sans);
-  --font-mono:    'JetBrains Mono', Consolas, monospace;
+  /* ── Typography Scale ──────────────────────────────────────── */
+  --font-sans:    'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-display: 'Manrope', 'Inter', -apple-system, sans-serif;
+  --font-mono:    'JetBrains Mono', 'Cascadia Code', Consolas, monospace;
 
+  /* ── Radius ────────────────────────────────────────────────── */
+  --radius-xs:   6px;
   --radius-sm:   8px;
-  --radius-md:  12px;
-  --radius-lg:  18px;
-  --radius-xl:  24px;
+  --radius-md:   12px;
+  --radius-lg:   16px;
+  --radius-xl:   20px;
+  --radius-2xl:  24px;
   --radius-full: 9999px;
 
-  --transition-fast:   140ms cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-normal: 240ms cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-slow:   380ms cubic-bezier(0.4, 0, 0.2, 1);
+  /* ── Transitions ───────────────────────────────────────────── */
+  --transition-fast:   150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow:   400ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-spring: 350ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
