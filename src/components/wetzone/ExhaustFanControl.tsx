@@ -25,38 +25,41 @@ export const ExhaustFanControl: React.FC = () => {
   const isBusy = isToggling || commandPending;
 
   return (
-    <div className="card-solid" style={{ padding: '22px', borderRadius: 'var(--radius-lg)', position: 'relative' }}>
+    <div className="card-solid" style={{ padding: '24px', borderRadius: 'var(--radius-lg)', position: 'relative' }}>
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <div
             className="icon-container"
             style={{
-              width: 36, height: 36,
-              background: isRunning ? 'rgba(192, 123, 43, 0.12)' : 'var(--bg-secondary)',
+              width: 38, height: 38,
+              borderRadius: 'var(--radius-sm)',
+              background: isRunning ? 'var(--color-warning-bg)' : 'var(--bg-secondary)',
               color: isRunning ? 'var(--color-warning)' : 'var(--text-secondary)',
-              border: `1px solid ${isRunning ? 'rgba(192, 123, 43, 0.22)' : 'var(--border-medium)'}`,
+              border: `1.5px solid ${isRunning ? 'rgba(181, 112, 10, 0.28)' : 'var(--border-card)'}`,
               transition: 'all var(--transition-normal)',
             }}
           >
-            <Power size={17} />
+            <Power size={18} />
           </div>
           <div>
-            <div className="section-heading">Exhaust Fan</div>
-            <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: 1 }}>
-              Moisture extraction & air renewal
+            <div className="section-heading">Exhaust Ventilation Fan</div>
+            <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)', marginTop: 2 }}>
+              Moisture extraction &amp; air renewal system
             </div>
           </div>
         </div>
 
         <span style={{
-          padding: '4px 10px',
+          padding: '5px 12px',
           borderRadius: 'var(--radius-full)',
-          fontSize: '0.72rem',
-          fontWeight: 600,
-          background: isRunning ? 'rgba(192, 123, 43, 0.10)' : 'var(--bg-secondary)',
+          fontSize: '0.74rem',
+          fontWeight: 700,
+          background: isRunning ? 'var(--color-warning-bg)' : 'var(--bg-secondary)',
           color: isRunning ? 'var(--color-warning)' : 'var(--text-muted)',
-          border: `1px solid ${isRunning ? 'rgba(192, 123, 43, 0.22)' : 'var(--border-medium)'}`,
+          border: `1.5px solid ${isRunning ? 'rgba(181, 112, 10, 0.28)' : 'var(--border-card)'}`,
+          textTransform: 'uppercase',
+          letterSpacing: '0.04em',
         }}>
           {!isConnected ? 'Offline' : isRunning ? 'Ventilating' : 'Standby'}
         </span>
@@ -66,31 +69,31 @@ export const ExhaustFanControl: React.FC = () => {
       <div style={{
         display: 'grid',
         gridTemplateColumns: 'auto 1fr',
-        gap: 16,
+        gap: 18,
         alignItems: 'center',
-        background: 'var(--bg-secondary)',
-        border: '1px solid var(--border-subtle)',
+        background: 'var(--surface-2)',
+        border: '1.5px solid var(--border-subtle)',
         borderRadius: 'var(--radius-md)',
-        padding: '16px',
-        marginBottom: 14,
+        padding: '18px',
+        marginBottom: 16,
       }}>
         <div style={{ display: 'flex', justifyContent: 'center' }}>
-          <ExhaustFanVisualizer size={130} />
+          <ExhaustFanVisualizer size={135} />
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {/* Runtime */}
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: '0.70rem', color: 'var(--text-muted)', marginBottom: 2 }}>
-              <Timer size={12} />
-              <span>Active Runtime</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 3 }}>
+              <Timer size={13} />
+              <span>Active Cycle Runtime</span>
             </div>
             <div className="tabular-nums" style={{
               fontFamily: 'var(--font-display)',
-              fontSize: '1.75rem',
-              fontWeight: 700,
+              fontSize: '1.85rem',
+              fontWeight: 800,
               color: isRunning ? 'var(--color-warning)' : 'var(--text-muted)',
-              letterSpacing: '-0.02em',
+              letterSpacing: '-0.03em',
               lineHeight: 1,
             }}>
               {isRunning
@@ -100,15 +103,15 @@ export const ExhaustFanControl: React.FC = () => {
           </div>
 
           {/* Humidity */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
-            <Droplets size={13} color="var(--accent-primary)" />
-            <span>Moisture: <strong style={{ color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>{currentHumidity !== null ? `${currentHumidity}%` : '—'}</strong></span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.80rem', color: 'var(--text-secondary)' }}>
+            <Droplets size={14} color="var(--accent-primary)" />
+            <span>Zone Moisture: <strong style={{ color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums', fontWeight: 700 }}>{currentHumidity !== null ? `${currentHumidity}%` : '—'}</strong></span>
           </div>
 
-          <div style={{ fontSize: '0.73rem', color: 'var(--text-muted)', lineHeight: 1.4 }}>
+          <div style={{ fontSize: '0.76rem', color: 'var(--text-secondary)', lineHeight: 1.45 }}>
             {isRunning
-              ? 'Extracting moist air to restore balance.'
-              : 'Triggers when humidity rises suddenly.'}
+              ? 'Relay active — extracting damp air until baseline is reached.'
+              : 'Relay open — automatic trigger armed for moisture spikes.'}
           </div>
         </div>
       </div>
@@ -121,7 +124,7 @@ export const ExhaustFanControl: React.FC = () => {
           background: 'var(--bg-secondary)',
           padding: '3px',
           borderRadius: 'var(--radius-sm)',
-          border: '1px solid var(--border-medium)',
+          border: '1.5px solid var(--border-card)',
         }}>
           {(['auto', 'manual'] as const).map(m => (
             <button
@@ -129,20 +132,20 @@ export const ExhaustFanControl: React.FC = () => {
               type="button"
               onClick={() => setExhaustMode(m)}
               style={{
-                padding: '5px 12px',
+                padding: '6px 14px',
                 borderRadius: 'calc(var(--radius-sm) - 2px)',
                 border: exhaustMode === m ? '1px solid var(--border-medium)' : '1px solid transparent',
-                background: exhaustMode === m ? '#FAFCFE' : 'transparent',
+                background: exhaustMode === m ? 'var(--surface-card)' : 'transparent',
                 color: exhaustMode === m ? 'var(--text-primary)' : 'var(--text-muted)',
-                fontSize: '0.76rem',
-                fontWeight: exhaustMode === m ? 600 : 500,
+                fontSize: '0.80rem',
+                fontWeight: exhaustMode === m ? 700 : 500,
                 cursor: 'pointer',
                 transition: 'all var(--transition-fast)',
                 fontFamily: 'var(--font-sans)',
                 boxShadow: exhaustMode === m ? 'var(--shadow-xs)' : 'none',
               }}
             >
-              {m === 'auto' ? 'Auto' : 'Manual'}
+              {m === 'auto' ? 'Auto Trigger' : 'Manual'}
             </button>
           ))}
         </div>
@@ -152,17 +155,17 @@ export const ExhaustFanControl: React.FC = () => {
           onClick={handleToggle}
           disabled={!isConnected || isBusy}
           style={{
-            padding: '9px 18px',
+            padding: '10px 22px',
             borderRadius: 'var(--radius-sm)',
-            border: `1px solid ${isRunning ? 'rgba(192, 57, 43, 0.30)' : isConnected ? 'rgba(8, 127, 140, 0.30)' : 'var(--border-medium)'}`,
+            border: `1.5px solid ${isRunning ? 'rgba(184, 50, 50, 0.35)' : isConnected ? 'rgba(8, 127, 140, 0.35)' : 'var(--border-card)'}`,
             background: isRunning
-              ? 'rgba(192, 57, 43, 0.08)'
+              ? 'rgba(184, 50, 50, 0.10)'
               : isConnected
               ? 'linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%)'
               : 'var(--bg-secondary)',
             color: isRunning ? 'var(--color-error)' : isConnected ? '#FFFFFF' : 'var(--text-muted)',
-            fontSize: '0.82rem',
-            fontWeight: 600,
+            fontSize: '0.86rem',
+            fontWeight: 700,
             display: 'flex',
             alignItems: 'center',
             gap: 7,
@@ -175,15 +178,15 @@ export const ExhaustFanControl: React.FC = () => {
           {isBusy ? (
             <><RefreshCw size={14} className="spin" /><span>Sending…</span></>
           ) : (
-            <><Power size={14} /><span>{isRunning ? 'Turn Off' : 'Turn On'}</span></>
+            <><Power size={15} /><span>{isRunning ? 'Stop Exhaust' : 'Start Exhaust'}</span></>
           )}
         </button>
       </div>
 
       {!isConnected && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.74rem', color: 'var(--color-error)', marginTop: 12 }}>
-          <AlertCircle size={13} />
-          <span>Hardware disconnected — exhaust fan controls disabled.</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.78rem', color: 'var(--color-error)', marginTop: 14 }}>
+          <AlertCircle size={14} />
+          <span>Hardware disconnected — exhaust fan actuator is offline.</span>
         </div>
       )}
     </div>

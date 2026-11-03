@@ -16,46 +16,58 @@ export const ModeSelector: React.FC = () => {
   };
 
   return (
-    <div
-      className="card-solid"
-      style={{
-        padding: '14px 18px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        flexWrap: 'wrap',
-        gap: 12,
-      }}
-    >
+    <div className="card-solid" style={{
+      padding: '16px 20px',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      flexWrap: 'wrap',
+      gap: 12,
+    }}>
+      {/* Left: description */}
       <div>
-        <div style={{ fontSize: '0.92rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-          Room Fan Mode
+        <div style={{
+          fontSize: '0.95rem',
+          fontWeight: 700,
+          color: 'var(--text-primary)',
+          fontFamily: 'var(--font-display)',
+        }}>
+          Fan Operation Mode
         </div>
-        <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: 2 }}>
+        <div style={{ fontSize: '0.80rem', color: 'var(--text-secondary)', marginTop: 3, lineHeight: 1.4 }}>
           {isConnected
             ? (isAuto
-              ? 'Automatically adjusts speed based on temperature & presence'
-              : 'Manual speed — fixed to your setpoint')
-            : 'Waiting for hardware connection…'}
+              ? 'Automatically adjusts speed based on temperature & occupancy'
+              : 'Manual speed — fixed to your chosen setpoint')
+            : 'Connect hardware to control the operating mode'}
         </div>
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      {/* Right: controls */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
         {isTransitioning && (
-          <span style={{ fontSize: '0.74rem', color: 'var(--accent-primary)', display: 'flex', alignItems: 'center', gap: 4 }}>
+          <span style={{
+            fontSize: '0.76rem',
+            color: 'var(--accent-primary)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 5,
+            fontWeight: 600,
+          }}>
             <RefreshCw size={12} className="spin" />
-            Updating
+            Switching…
           </span>
         )}
 
-        {/* Segmented Control */}
+        {/* Segmented pill control */}
         <div style={{
           background: 'var(--bg-secondary)',
-          padding: '3px',
+          padding: '4px',
           borderRadius: 'var(--radius-md)',
           display: 'flex',
           gap: 3,
-          border: '1px solid var(--border-medium)',
+          border: '1.5px solid var(--border-card)',
+          boxShadow: 'var(--shadow-xs)',
           opacity: isConnected ? 1 : 0.5,
         }}>
           <button
@@ -63,15 +75,17 @@ export const ModeSelector: React.FC = () => {
             disabled={!isConnected || isTransitioning || commandPending}
             style={{
               display: 'flex', alignItems: 'center', gap: 6,
-              padding: '7px 16px',
+              padding: '8px 18px',
               borderRadius: 'calc(var(--radius-md) - 2px)',
-              border: !isAuto ? '1px solid rgba(57, 121, 216, 0.30)' : '1px solid transparent',
-              background: !isAuto ? '#FAFCFE' : 'transparent',
-              color: !isAuto ? 'var(--accent-secondary)' : 'var(--text-muted)',
+              border: !isAuto ? '1px solid rgba(8,127,140,0.28)' : '1px solid transparent',
+              background: !isAuto
+                ? 'linear-gradient(135deg, var(--surface-card) 0%, #F0F8F5 100%)'
+                : 'transparent',
+              color: !isAuto ? 'var(--accent-primary)' : 'var(--text-muted)',
               boxShadow: !isAuto ? 'var(--shadow-xs)' : 'none',
               cursor: isConnected ? 'pointer' : 'not-allowed',
-              fontWeight: !isAuto ? 600 : 500,
-              fontSize: '0.82rem',
+              fontWeight: !isAuto ? 700 : 500,
+              fontSize: '0.84rem',
               transition: 'all var(--transition-fast)',
               fontFamily: 'var(--font-sans)',
             }}
@@ -85,15 +99,17 @@ export const ModeSelector: React.FC = () => {
             disabled={!isConnected || isTransitioning || commandPending}
             style={{
               display: 'flex', alignItems: 'center', gap: 6,
-              padding: '7px 16px',
+              padding: '8px 18px',
               borderRadius: 'calc(var(--radius-md) - 2px)',
-              border: isAuto ? '1px solid rgba(8, 127, 140, 0.30)' : '1px solid transparent',
-              background: isAuto ? '#FAFCFE' : 'transparent',
-              color: isAuto ? 'var(--accent-primary)' : 'var(--text-muted)',
-              boxShadow: isAuto ? 'var(--shadow-xs)' : 'none',
+              border: isAuto ? '1px solid rgba(8,127,140,0.28)' : '1px solid transparent',
+              background: isAuto
+                ? 'linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%)'
+                : 'transparent',
+              color: isAuto ? '#FFFFFF' : 'var(--text-muted)',
+              boxShadow: isAuto ? 'var(--shadow-teal)' : 'none',
               cursor: isConnected ? 'pointer' : 'not-allowed',
-              fontWeight: isAuto ? 600 : 500,
-              fontSize: '0.82rem',
+              fontWeight: isAuto ? 700 : 500,
+              fontSize: '0.84rem',
               transition: 'all var(--transition-fast)',
               fontFamily: 'var(--font-sans)',
             }}

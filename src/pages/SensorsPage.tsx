@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { useAirLoop } from '../context/AirLoopContext';
 import { SensorCard } from '../components/sensors/SensorCard';
-import { 
-  Cpu, 
-  Thermometer, 
-  Droplets, 
-  UserCheck, 
-  Wind, 
-  Power, 
+import {
+  Cpu,
+  Thermometer,
+  Droplets,
+  UserCheck,
+  Wind,
+  Power,
   Activity,
   Code,
   ChevronDown,
@@ -22,193 +22,177 @@ export const SensorsPage: React.FC = () => {
   const [showAdvanced, setShowAdvanced] = useState<boolean>(false);
 
   return (
-    <div className="fade-in-up" style={{ display: 'flex', flexDirection: 'column', gap: 20, maxWidth: 1400, margin: '0 auto' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 14 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div className="icon-container icon-container-teal" style={{ width: 38, height: 38 }}>
-            <Cpu size={18} />
+    <div className="fade-in-up" style={{ display: 'flex', flexDirection: 'column', gap: 22, maxWidth: 1400, margin: '0 auto' }}>
+
+      {/* Page header */}
+      <div className="page-header">
+        <div className="page-header-brand">
+          <div className="icon-container icon-container-teal" style={{ width: 42, height: 42, borderRadius: 'var(--radius-md)' }}>
+            <Cpu size={20} />
           </div>
           <div>
             <h1 className="page-title">Sensor Status</h1>
-            <p className="page-subtitle">Real-time status of environmental sensors and fan actuators</p>
+            <p className="page-subtitle">Real-time readings from all environmental sensors and fan actuators</p>
           </div>
         </div>
 
         {/* Toggle Advanced Diagnostics */}
         <button
           onClick={() => setShowAdvanced(!showAdvanced)}
-          className="btn-secondary"
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: 8,
-            fontSize: '0.80rem',
-            padding: '8px 16px',
+            gap: 7,
+            background: showAdvanced ? 'var(--accent-primary-dim)' : 'var(--surface-card)',
+            border: `1.5px solid ${showAdvanced ? 'rgba(8, 127, 140, 0.35)' : 'var(--border-card)'}`,
+            color: showAdvanced ? 'var(--accent-primary)' : 'var(--text-secondary)',
             borderRadius: 'var(--radius-sm)',
-            borderColor: showAdvanced ? 'var(--accent-primary)' : undefined,
-            color: showAdvanced ? 'var(--accent-primary)' : undefined,
+            padding: '9px 18px',
+            fontSize: '0.84rem',
+            fontWeight: 600,
+            cursor: 'pointer',
+            transition: 'all var(--transition-fast)',
+            fontFamily: 'var(--font-sans)',
+            boxShadow: 'var(--shadow-xs)',
           }}
         >
-          <Code size={14} />
-          <span>{showAdvanced ? 'Hide Diagnostics' : 'Advanced Diagnostics'}</span>
+          <Code size={15} />
+          <span>{showAdvanced ? 'Hide Diagnostics' : 'Engineering Diagnostics'}</span>
           {showAdvanced ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
         </button>
       </div>
 
-      {/* 6 User-Friendly Sensor Cards */}
+      {/* 6 Sensor Cards */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))',
         gap: 16
       }}>
         {/* 1. Room Temperature */}
         <SensorCard
           title="Room Temperature"
-          subtitle="Comfort sensor"
+          subtitle="DHT11 comfort sensor"
           value={isConnected && telemetry.comfortTemperatureC !== null ? `${telemetry.comfortTemperatureC.toFixed(1)}` : '—'}
           unit="°C"
           status={isConnected && telemetry.sensorHealth.comfortDht11 === 'OK' ? 'ONLINE' : 'OFFLINE'}
-          statusText={isConnected ? 'Normal' : 'Offline'}
-          description={isConnected && telemetry.comfortTemperatureC !== null ? (telemetry.comfortTemperatureC < 26 ? 'Cool environment' : telemetry.comfortTemperatureC <= 29 ? 'Comfortable temperature' : 'Warm room') : 'Sensor offline'}
-          icon={<Thermometer size={18} />}
+          statusText={isConnected ? 'Reading' : 'Offline'}
+          description={isConnected && telemetry.comfortTemperatureC !== null
+            ? (telemetry.comfortTemperatureC < 26 ? 'Cool environment — comfortable'
+              : telemetry.comfortTemperatureC <= 29 ? 'Ideal temperature range'
+              : 'Warm — fan assist recommended')
+            : 'Sensor offline — hardware disconnected'}
+          icon={<Thermometer size={19} />}
         />
 
         {/* 2. Humidity Level */}
         <SensorCard
           title="Humidity Level"
-          subtitle="Moisture sensor"
+          subtitle="DHT11 moisture sensor"
           value={isConnected && telemetry.wetZoneHumidityPercent !== null ? `${telemetry.wetZoneHumidityPercent}` : '—'}
           unit="%"
           status={isConnected && telemetry.sensorHealth.wetDht11 === 'OK' ? 'ONLINE' : 'OFFLINE'}
-          statusText={isConnected ? 'Normal' : 'Offline'}
-          description={isConnected && telemetry.humidityBaselinePercent !== null ? `Baseline target: ${telemetry.humidityBaselinePercent}%` : 'Sensor offline'}
-          icon={<Droplets size={18} />}
+          statusText={isConnected ? 'Reading' : 'Offline'}
+          description={isConnected && telemetry.humidityBaselinePercent !== null
+            ? `Baseline target: ${telemetry.humidityBaselinePercent}% — auto exhaust armed`
+            : 'Sensor offline — hardware disconnected'}
+          icon={<Droplets size={19} />}
         />
 
         {/* 3. Room Occupancy */}
         <SensorCard
           title="Room Occupancy"
-          subtitle="Presence detector"
+          subtitle="HC-SR501 PIR presence detector"
           value={!isConnected ? '—' : telemetry.occupancyDetected ? 'Occupied' : 'Vacant'}
           status={isConnected && telemetry.sensorHealth.pirMotion === 'OK' ? 'ONLINE' : 'OFFLINE'}
           statusText={isConnected ? (telemetry.occupancyDetected ? 'Motion Active' : 'Standby') : 'Offline'}
-          description={isConnected ? (telemetry.occupancyDetected ? 'Person detected in room' : 'Room is currently vacant') : 'Sensor offline'}
-          icon={<UserCheck size={18} />}
+          description={isConnected
+            ? (telemetry.occupancyDetected ? 'Presence confirmed — fan operating at full comfort speed' : 'No motion detected — power-saving mode active')
+            : 'Sensor offline — hardware disconnected'}
+          icon={<UserCheck size={19} />}
         />
 
         {/* 4. Ceiling Fan */}
         <SensorCard
           title="Ceiling Fan"
-          subtitle="Air circulation actuator"
+          subtitle="IRLZ44N MOSFET PWM driver"
           value={isConnected ? `${telemetry.requestedFanSpeedPercent}` : '—'}
           unit="%"
           status={isConnected && telemetry.fanRunningState === 'RUNNING' && telemetry.requestedFanSpeedPercent > 0 ? 'ACTIVE' : 'STANDBY'}
           statusText={isConnected ? (telemetry.fanRunningState === 'RUNNING' && telemetry.requestedFanSpeedPercent > 0 ? 'Running' : 'Standby') : 'Offline'}
-          description={isConnected ? (telemetry.activeMode === 'auto' ? 'Automatic climate modulation' : 'Manual speed setpoint') : 'Hardware offline'}
-          icon={<Wind size={18} />}
+          description={isConnected
+            ? (telemetry.activeMode === 'auto' ? 'Automatic climate modulation — temperature-driven speed' : 'Manual speed setpoint — operator controlled')
+            : 'Actuator offline — hardware disconnected'}
+          icon={<Wind size={19} />}
         />
 
         {/* 5. Exhaust Fan */}
         <SensorCard
           title="Exhaust Fan"
-          subtitle="Moisture ventilation driver"
+          subtitle="Digital relay output driver"
           value={!isConnected ? '—' : telemetry.exhaustFanState ? 'Running' : 'Off'}
           status={isConnected && telemetry.exhaustFanState ? 'ACTIVE' : 'STANDBY'}
           statusText={isConnected ? (telemetry.exhaustFanState ? 'Ventilating' : 'Standby') : 'Offline'}
-          description={isConnected && telemetry.exhaustFanState ? `${Math.floor(telemetry.exhaustFanRuntimeSeconds / 60)}m extraction active` : 'Standing by for moisture trigger'}
-          icon={<Power size={18} />}
+          description={isConnected && telemetry.exhaustFanState
+            ? `${Math.floor(telemetry.exhaustFanRuntimeSeconds / 60)}m ${telemetry.exhaustFanRuntimeSeconds % 60}s extraction active`
+            : 'Relay open — armed for humidity surge trigger'}
+          icon={<Power size={19} />}
         />
 
         {/* 6. Hardware Connection */}
         <SensorCard
           title="Hardware Connection"
-          subtitle="ESP32 Controller node"
+          subtitle="ESP32 dual-core controller"
           value={isConnected ? 'Connected' : 'Offline'}
           status={isConnected ? 'ONLINE' : 'OFFLINE'}
-          statusText={isConnected ? (pingLatency !== null ? `${pingLatency}ms` : 'Good') : 'Disconnected'}
-          description={isConnected ? (telemetry.firmwareVersion || 'ESP32 Node Online') : 'Waiting for hardware connection'}
-          icon={<Activity size={18} />}
+          statusText={isConnected ? (pingLatency !== null ? `${pingLatency}ms` : 'Live') : 'Disconnected'}
+          description={isConnected
+            ? (telemetry.firmwareVersion ? `Firmware: ${telemetry.firmwareVersion}` : 'ESP32 node communicating normally')
+            : 'Waiting for hardware connection — check device IP'}
+          icon={<Activity size={19} />}
         />
       </div>
 
-      {/* Advanced Diagnostics Section (Collapsible) */}
+      {/* Advanced Diagnostics (Collapsible) */}
       {showAdvanced && (
-        <div className="card-solid fade-in-up" style={{ padding: '24px', borderRadius: 'var(--radius-lg)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-            <div className="icon-container icon-container-blue" style={{ width: 32, height: 32 }}>
-              <Code size={16} />
+        <div className="card-solid fade-in-up" style={{ padding: '26px', borderRadius: 'var(--radius-lg)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 11, marginBottom: 6 }}>
+            <div className="icon-container icon-container-blue" style={{ width: 36, height: 36, borderRadius: 'var(--radius-sm)' }}>
+              <Code size={17} />
             </div>
-            <h3 className="section-heading">
-              Advanced Engineering Diagnostics &amp; GPIO Mapping
-            </h3>
+            <div>
+              <h3 className="section-heading">Engineering Diagnostics &amp; GPIO Mapping</h3>
+              <p style={{ fontSize: '0.76rem', color: 'var(--text-muted)', marginTop: 2 }}>
+                Low-level hardware pinouts, communication protocols, and firmware memory metrics.
+              </p>
+            </div>
           </div>
-          <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: 16 }}>
-            Low-level hardware pinouts, communication protocols, and firmware memory metrics.
-          </p>
 
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', textAlign: 'left' }}>
+          <div style={{ overflowX: 'auto', marginTop: 16 }}>
+            <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: 0, fontSize: '0.84rem', textAlign: 'left' }}>
               <thead>
-                <tr style={{
-                  borderBottom: '1px solid var(--border-medium)',
-                  background: 'var(--bg-secondary)',
-                  color: 'var(--text-secondary)'
-                }}>
-                  <th style={{ padding: '10px 14px', borderRadius: '6px 0 0 6px', fontWeight: 600 }}>Pin / Bus</th>
-                  <th style={{ padding: '10px 14px', fontWeight: 600 }}>Hardware Component</th>
-                  <th style={{ padding: '10px 14px', fontWeight: 600 }}>Driver Protocol</th>
-                  <th style={{ padding: '10px 14px', borderRadius: '0 6px 6px 0', fontWeight: 600 }}>Live Hardware Value</th>
+                <tr style={{ background: 'var(--bg-secondary)' }}>
+                  <th style={{ padding: '11px 16px', borderRadius: '9px 0 0 9px', fontWeight: 700, color: 'var(--text-secondary)', fontSize: '0.76rem', textTransform: 'uppercase', letterSpacing: '0.04em', borderBottom: '1.5px solid var(--border-card)' }}>Pin / Bus</th>
+                  <th style={{ padding: '11px 16px', fontWeight: 700, color: 'var(--text-secondary)', fontSize: '0.76rem', textTransform: 'uppercase', letterSpacing: '0.04em', borderBottom: '1.5px solid var(--border-card)' }}>Hardware Component</th>
+                  <th style={{ padding: '11px 16px', fontWeight: 700, color: 'var(--text-secondary)', fontSize: '0.76rem', textTransform: 'uppercase', letterSpacing: '0.04em', borderBottom: '1.5px solid var(--border-card)' }}>Driver Protocol</th>
+                  <th style={{ padding: '11px 16px', borderRadius: '0 9px 9px 0', fontWeight: 700, color: 'var(--text-secondary)', fontSize: '0.76rem', textTransform: 'uppercase', letterSpacing: '0.04em', borderBottom: '1.5px solid var(--border-card)' }}>Live Value</th>
                 </tr>
               </thead>
               <tbody>
-                <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}>
-                  <td style={{ padding: '12px 14px', fontFamily: 'var(--font-mono)', fontWeight: 600, color: 'var(--accent-primary)' }}>GPIO 4</td>
-                  <td style={{ padding: '12px 14px', color: 'var(--text-primary)', fontWeight: 600 }}>DHT11 Comfort Sensor</td>
-                  <td style={{ padding: '12px 14px', color: 'var(--text-secondary)' }}>1-Wire Single Bus</td>
-                  <td style={{ padding: '12px 14px', fontFamily: 'var(--font-mono)' }}>
-                    {isConnected && telemetry.comfortTemperatureC !== null ? `${telemetry.comfortTemperatureC.toFixed(1)}°C / ${telemetry.comfortHumidityPercent}%` : 'Unavailable'}
-                  </td>
-                </tr>
-                <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}>
-                  <td style={{ padding: '12px 14px', fontFamily: 'var(--font-mono)', fontWeight: 600, color: 'var(--accent-primary)' }}>GPIO 5</td>
-                  <td style={{ padding: '12px 14px', color: 'var(--text-primary)', fontWeight: 600 }}>DHT11 Moisture Sensor</td>
-                  <td style={{ padding: '12px 14px', color: 'var(--text-secondary)' }}>1-Wire Single Bus</td>
-                  <td style={{ padding: '12px 14px', fontFamily: 'var(--font-mono)' }}>
-                    {isConnected && telemetry.wetZoneHumidityPercent !== null ? `${telemetry.wetZoneHumidityPercent}% RH` : 'Unavailable'}
-                  </td>
-                </tr>
-                <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}>
-                  <td style={{ padding: '12px 14px', fontFamily: 'var(--font-mono)', fontWeight: 600, color: 'var(--accent-primary)' }}>GPIO 27</td>
-                  <td style={{ padding: '12px 14px', color: 'var(--text-primary)', fontWeight: 600 }}>HC-SR501 PIR Sensor</td>
-                  <td style={{ padding: '12px 14px', color: 'var(--text-secondary)' }}>Digital GPIO Interrupt</td>
-                  <td style={{ padding: '12px 14px' }}>
-                    {isConnected ? (telemetry.occupancyDetected ? 'HIGH (Active Presence)' : 'LOW (Room Idle)') : 'Unavailable'}
-                  </td>
-                </tr>
-                <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}>
-                  <td style={{ padding: '12px 14px', fontFamily: 'var(--font-mono)', fontWeight: 600, color: 'var(--accent-primary)' }}>GPIO 25</td>
-                  <td style={{ padding: '12px 14px', color: 'var(--text-primary)', fontWeight: 600 }}>Fan MOSFET (IRLZ44N)</td>
-                  <td style={{ padding: '12px 14px', color: 'var(--text-secondary)' }}>LEDC 25kHz PWM Output</td>
-                  <td style={{ padding: '12px 14px', fontFamily: 'var(--font-mono)' }}>
-                    {isConnected ? `${telemetry.requestedFanSpeedPercent}% Duty Cycle` : 'Unavailable'}
-                  </td>
-                </tr>
-                <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}>
-                  <td style={{ padding: '12px 14px', fontFamily: 'var(--font-mono)', fontWeight: 600, color: 'var(--accent-primary)' }}>GPIO 26</td>
-                  <td style={{ padding: '12px 14px', color: 'var(--text-primary)', fontWeight: 600 }}>Exhaust Fan Driver</td>
-                  <td style={{ padding: '12px 14px', color: 'var(--text-secondary)' }}>Digital Relay Output</td>
-                  <td style={{ padding: '12px 14px' }}>
-                    {isConnected ? (telemetry.exhaustFanState ? 'RELAY CLOSED (Engaged)' : 'RELAY OPEN (Standby)') : 'Unavailable'}
-                  </td>
-                </tr>
-                <tr>
-                  <td style={{ padding: '12px 14px', fontFamily: 'var(--font-mono)', fontWeight: 600, color: 'var(--accent-primary)' }}>System</td>
-                  <td style={{ padding: '12px 14px', color: 'var(--text-primary)', fontWeight: 600 }}>ESP32 Dual-Core MCU</td>
-                  <td style={{ padding: '12px 14px', color: 'var(--text-secondary)' }}>HTTP / JSON REST API</td>
-                  <td style={{ padding: '12px 14px', fontFamily: 'var(--font-mono)' }}>
-                    {isConnected ? `Free Heap: ${metrics?.freeHeapBytes ? Math.round(metrics.freeHeapBytes / 1024) : 198} KB` : 'Offline'}
-                  </td>
-                </tr>
+                {[
+                  { pin: 'GPIO 4',  component: 'DHT11 Comfort Sensor',  protocol: '1-Wire Single Bus',       value: isConnected && telemetry.comfortTemperatureC !== null ? `${telemetry.comfortTemperatureC.toFixed(1)}°C / ${telemetry.comfortHumidityPercent}%` : 'Unavailable' },
+                  { pin: 'GPIO 5',  component: 'DHT11 Moisture Sensor', protocol: '1-Wire Single Bus',       value: isConnected && telemetry.wetZoneHumidityPercent !== null ? `${telemetry.wetZoneHumidityPercent}% RH` : 'Unavailable' },
+                  { pin: 'GPIO 27', component: 'HC-SR501 PIR Sensor',   protocol: 'Digital GPIO Interrupt',  value: isConnected ? (telemetry.occupancyDetected ? 'HIGH — Active Presence' : 'LOW — Room Idle') : 'Unavailable' },
+                  { pin: 'GPIO 25', component: 'Fan MOSFET (IRLZ44N)',  protocol: 'LEDC 25kHz PWM Output',   value: isConnected ? `${telemetry.requestedFanSpeedPercent}% Duty Cycle` : 'Unavailable' },
+                  { pin: 'GPIO 26', component: 'Exhaust Fan Relay',     protocol: 'Digital Relay Output',    value: isConnected ? (telemetry.exhaustFanState ? 'RELAY CLOSED — Active' : 'RELAY OPEN — Standby') : 'Unavailable' },
+                  { pin: 'System',  component: 'ESP32 Dual-Core MCU',   protocol: 'HTTP / JSON REST API',    value: isConnected ? `Free Heap: ${metrics?.freeHeapBytes ? Math.round(metrics.freeHeapBytes / 1024) : 198} KB` : 'Offline' },
+                ].map((row, idx, arr) => (
+                  <tr key={row.pin} style={{ borderBottom: idx < arr.length - 1 ? '1px solid var(--border-subtle)' : 'none' }}>
+                    <td style={{ padding: '13px 16px', fontFamily: 'var(--font-mono)', fontWeight: 700, color: 'var(--accent-primary)', fontSize: '0.84rem' }}>{row.pin}</td>
+                    <td style={{ padding: '13px 16px', color: 'var(--text-primary)', fontWeight: 600 }}>{row.component}</td>
+                    <td style={{ padding: '13px 16px', color: 'var(--text-secondary)' }}>{row.protocol}</td>
+                    <td style={{ padding: '13px 16px', fontFamily: 'var(--font-mono)', color: 'var(--text-primary)', fontSize: '0.82rem' }}>{row.value}</td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>

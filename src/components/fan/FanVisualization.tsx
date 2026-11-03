@@ -34,11 +34,11 @@ export const FanVisualization: React.FC<FanVisualizationProps> = ({ size = 240, 
           position: 'absolute',
           inset: 0,
           borderRadius: '50%',
-          background: 'radial-gradient(circle at 38% 32%, #E5ECF4 0%, #D4DFE8 65%, #C0CDD8 100%)',
-          border: `2px solid ${isRunning ? 'rgba(8, 127, 140, 0.50)' : 'rgba(23, 38, 59, 0.12)'}`,
+          background: 'var(--fan-housing-bg)',
+          border: `2px solid ${isRunning ? 'var(--accent-primary)' : 'var(--border-card)'}`,
           boxShadow: isRunning
-            ? '0 0 28px rgba(8, 127, 140, 0.16), var(--shadow-md)'
-            : 'var(--shadow-md)',
+            ? '0 0 28px rgba(8, 127, 140, 0.20), var(--shadow-md)'
+            : 'var(--shadow-card)',
           transition: 'all 0.45s ease',
         }}>
           {/* Scale ticks */}
@@ -57,10 +57,10 @@ export const FanVisualization: React.FC<FanVisualizationProps> = ({ size = 240, 
                 <line
                   key={i}
                   x1={x1} y1={y1} x2={x2} y2={y2}
-                  stroke={active ? '#087F8C' : 'rgba(23, 38, 59, 0.14)'}
+                  stroke={active ? 'var(--accent-primary)' : 'var(--border-medium)'}
                   strokeWidth={i % 10 === 0 ? 2.2 : 1.2}
                   strokeLinecap="round"
-                  opacity={active ? 0.9 : 0.55}
+                  opacity={active ? 0.95 : 0.45}
                 />
               );
             })}
@@ -78,21 +78,21 @@ export const FanVisualization: React.FC<FanVisualizationProps> = ({ size = 240, 
             justifyContent: 'center',
             animationDuration: spinDuration,
             transition: isRunning ? 'none' : 'transform 1.8s cubic-bezier(0.16, 1, 0.3, 1)',
-            filter: 'drop-shadow(0 6px 12px rgba(23, 38, 59, 0.20))',
+            filter: 'drop-shadow(0 6px 14px rgba(29, 48, 46, 0.22))',
           }}
         >
           <svg viewBox="0 0 220 220" width="100%" height="100%">
             <defs>
-              <linearGradient id="bladeGradLight" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#8FA3BB" />
-                <stop offset="40%" stopColor="#617187" />
-                <stop offset="75%" stopColor="#4A5B70" />
-                <stop offset="100%" stopColor="#344155" />
+              <linearGradient id="bladeGradSage" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#526663" />
+                <stop offset="40%" stopColor="#397A65" />
+                <stop offset="75%" stopColor="#244D40" />
+                <stop offset="100%" stopColor="#1D302E" />
               </linearGradient>
-              <radialGradient id="hubGradLight" cx="38%" cy="32%" r="65%">
-                <stop offset="0%" stopColor="#9EB3C8" />
-                <stop offset="55%" stopColor="#617187" />
-                <stop offset="100%" stopColor="#3D4F63" />
+              <radialGradient id="hubGradSage" cx="38%" cy="32%" r="65%">
+                <stop offset="0%" stopColor="#7A9490" />
+                <stop offset="55%" stopColor="#397A65" />
+                <stop offset="100%" stopColor="#1D302E" />
               </radialGradient>
             </defs>
 
@@ -102,13 +102,13 @@ export const FanVisualization: React.FC<FanVisualizationProps> = ({ size = 240, 
                 {/* Blade shadow */}
                 <path
                   d="M 110,110 C 122,86 142,50 154,20 C 158,10 148,5 136,8 C 112,14 92,45 100,92 Z"
-                  fill="rgba(23, 38, 59, 0.18)"
+                  fill="rgba(29, 48, 46, 0.18)"
                   transform="translate(1.5, 2)"
                 />
                 {/* Blade body */}
                 <path
                   d="M 110,110 C 122,86 142,50 154,20 C 158,10 148,5 136,8 C 112,14 92,45 100,92 Z"
-                  fill="url(#bladeGradLight)"
+                  fill="url(#bladeGradSage)"
                   stroke="rgba(255,255,255,0.35)"
                   strokeWidth="0.8"
                 />
@@ -116,16 +116,16 @@ export const FanVisualization: React.FC<FanVisualizationProps> = ({ size = 240, 
                 <path
                   d="M 110,110 C 120,86 136,54 146,24"
                   fill="none"
-                  stroke="rgba(255,255,255,0.45)"
+                  stroke="rgba(184, 229, 223, 0.40)"
                   strokeWidth="0.9"
                 />
               </g>
             ))}
 
             {/* Motor Hub */}
-            <circle cx="110" cy="110" r="34" fill="url(#hubGradLight)" stroke="rgba(255,255,255,0.45)" strokeWidth="1.5" />
-            <circle cx="110" cy="110" r="25" fill="none" stroke={isRunning ? 'rgba(8, 127, 140, 0.40)' : 'rgba(23, 38, 59, 0.12)'} strokeWidth="1" strokeDasharray="3 2.5" />
-            <circle cx="110" cy="110" r="15" fill="#E5ECF4" stroke={isRunning ? '#087F8C' : 'rgba(23, 38, 59, 0.18)'} strokeWidth="1.5" />
+            <circle cx="110" cy="110" r="34" fill="url(#hubGradSage)" stroke="rgba(255,255,255,0.45)" strokeWidth="1.5" />
+            <circle cx="110" cy="110" r="25" fill="none" stroke={isRunning ? 'rgba(8, 127, 140, 0.50)' : 'rgba(29, 48, 46, 0.14)'} strokeWidth="1" strokeDasharray="3 2.5" />
+            <circle cx="110" cy="110" r="15" fill="#DFE7E2" stroke={isRunning ? 'var(--accent-primary)' : 'var(--border-strong)'} strokeWidth="1.5" />
           </svg>
         </div>
 
@@ -137,21 +137,21 @@ export const FanVisualization: React.FC<FanVisualizationProps> = ({ size = 240, 
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          background: 'rgba(250, 252, 254, 0.97)',
-          backdropFilter: 'blur(6px)',
-          border: `1.5px solid ${isRunning ? 'rgba(8, 127, 140, 0.40)' : 'rgba(23, 38, 59, 0.12)'}`,
+          background: 'var(--fan-center-badge-bg)',
+          backdropFilter: 'blur(8px)',
+          border: `1.5px solid ${isRunning ? 'var(--accent-primary)' : 'var(--border-card)'}`,
           borderRadius: '50%',
-          width: size * 0.34,
-          height: size * 0.34,
+          width: size * 0.35,
+          height: size * 0.35,
           boxShadow: isRunning
-            ? '0 4px 16px rgba(8, 127, 140, 0.20)'
-            : 'var(--shadow-sm)',
+            ? '0 4px 16px rgba(8, 127, 140, 0.22)'
+            : 'var(--shadow-card)',
           transition: 'all 0.4s ease',
         }}>
           <span className="tabular-nums" style={{
             fontFamily: 'var(--font-display)',
             fontSize: `${Math.round(size * 0.088)}px`,
-            fontWeight: 700,
+            fontWeight: 800,
             color: !isConnected ? 'var(--text-muted)' : isRunning ? 'var(--accent-primary)' : 'var(--text-secondary)',
             lineHeight: 1,
           }}>
@@ -159,10 +159,10 @@ export const FanVisualization: React.FC<FanVisualizationProps> = ({ size = 240, 
           </span>
           <span style={{
             fontSize: '0.56rem',
-            fontWeight: 600,
+            fontWeight: 700,
             color: !isConnected ? 'var(--color-error)' : isRunning ? 'var(--accent-primary)' : 'var(--text-muted)',
             marginTop: 3,
-            letterSpacing: '0.08em',
+            letterSpacing: '0.09em',
             textTransform: 'uppercase',
           }}>
             {!isConnected ? 'OFFLINE' : isRunning ? 'RUNNING' : 'STOPPED'}
@@ -172,23 +172,24 @@ export const FanVisualization: React.FC<FanVisualizationProps> = ({ size = 240, 
 
       {showLabels && (
         <div style={{
-          marginTop: 14,
+          marginTop: 16,
           display: 'flex',
           alignItems: 'center',
           gap: 16,
-          fontSize: '0.75rem',
+          fontSize: '0.78rem',
           color: 'var(--text-secondary)',
+          fontWeight: 500,
         }}>
           <span>
             Target:{' '}
-            <strong style={{ color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>
+            <strong style={{ color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums', fontWeight: 700 }}>
               {isConnected ? `${requestedFanSpeedPercent}%` : '—'}
             </strong>
           </span>
           <span style={{ opacity: 0.4 }}>·</span>
           <span>
-            PWM:{' '}
-            <strong style={{ color: isRunning ? 'var(--accent-primary)' : 'var(--text-muted)', fontVariantNumeric: 'tabular-nums' }}>
+            PWM Output:{' '}
+            <strong style={{ color: isRunning ? 'var(--accent-primary)' : 'var(--text-muted)', fontVariantNumeric: 'tabular-nums', fontWeight: 700 }}>
               {isConnected && hardwarePwmPercent !== null
                 ? `${hardwarePwmPercent}%`
                 : isConnected ? `${requestedFanSpeedPercent}%` : '—'}

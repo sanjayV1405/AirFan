@@ -233,7 +233,7 @@ export const ActivityTimeline: React.FC = () => {
               <div
                 key={evt.id}
                 style={{
-                  background: 'var(--surface-solid)',
+                  background: 'var(--surface-card)',
                   border: '1px solid var(--border-card)',
                   borderRadius: 'var(--radius-md)',
                   padding: '12px 16px',

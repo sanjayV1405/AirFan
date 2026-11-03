@@ -17,17 +17,17 @@ export const ComfortZonePage: React.FC = () => {
   const timeRemSec = Math.max(0, timeoutSec - lastMotionSec);
 
   return (
-    <div className="fade-in-up" style={{ display: 'flex', flexDirection: 'column', gap: 20, maxWidth: 1400, margin: '0 auto' }}>
+    <div className="fade-in-up" style={{ display: 'flex', flexDirection: 'column', gap: 22, maxWidth: 1400, margin: '0 auto' }}>
 
       {/* Page header */}
-      <div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div className="icon-container icon-container-teal" style={{ width: 38, height: 38 }}>
-            <Wind size={18} />
+      <div className="page-header">
+        <div className="page-header-brand">
+          <div className="icon-container icon-container-teal" style={{ width: 42, height: 42, borderRadius: 'var(--radius-md)' }}>
+            <Wind size={20} />
           </div>
           <div>
             <h1 className="page-title">Room Comfort</h1>
-            <p className="page-subtitle">Temperature ranges, occupancy detection, and auto power-saving</p>
+            <p className="page-subtitle">Temperature ranges, occupancy presence, and automated power-saving</p>
           </div>
         </div>
       </div>
@@ -35,16 +35,16 @@ export const ComfortZonePage: React.FC = () => {
       <ModeSelector />
       <TemperatureBandsBar />
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 18 }}>
 
         {/* Presence card */}
-        <div className="card-solid" style={{ padding: '22px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+        <div className="card-solid" style={{ padding: '24px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <div className={`icon-container ${isOccupied ? 'icon-container-success' : 'icon-container-neutral'}`} style={{ width: 36, height: 36 }}>
-                {isOccupied ? <UserCheck size={17} /> : <UserX size={17} />}
+              <div className={`icon-container ${isOccupied ? 'icon-container-success' : 'icon-container-neutral'}`} style={{ width: 38, height: 38, borderRadius: 'var(--radius-sm)' }}>
+                {isOccupied ? <UserCheck size={18} /> : <UserX size={18} />}
               </div>
-              <div className="section-heading">Room Presence</div>
+              <div className="section-heading">Room Presence &amp; Timeout</div>
             </div>
             <span className={`badge ${!isConnected ? 'badge-neutral' : isOccupied ? 'badge-success' : 'badge-warning'}`}>
               {!isConnected ? 'Offline' : isOccupied ? 'Occupied' : 'Vacant'}
@@ -52,50 +52,56 @@ export const ComfortZonePage: React.FC = () => {
           </div>
 
           <div style={{
-            background: 'var(--bg-secondary)',
-            border: '1px solid var(--border-subtle)',
+            background: 'var(--surface-2)',
+            border: '1.5px solid var(--border-subtle)',
             borderRadius: 'var(--radius-md)',
-            padding: '16px 18px',
+            padding: '18px 20px',
           }}>
-            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 500, marginBottom: 6 }}>
+            <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>
               Inactivity Countdown
             </div>
             <div className="tabular-nums" style={{
               fontFamily: 'var(--font-display)',
-              fontSize: '1.8rem',
-              fontWeight: 700,
+              fontSize: '2rem',
+              fontWeight: 800,
               color: !isConnected ? 'var(--text-muted)' : isOccupied ? 'var(--color-success)' : 'var(--color-warning)',
               lineHeight: 1,
-              letterSpacing: '-0.025em',
+              letterSpacing: '-0.03em',
             }}>
               {!isConnected
                 ? '—'
                 : isOccupied
-                ? 'Active'
+                ? 'Active Presence'
                 : `${Math.floor(timeRemSec / 60)}m ${timeRemSec % 60}s`}
             </div>
-            <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)', marginTop: 8, lineHeight: 1.5 }}>
-              After {config.occupancyTimeoutMinutes} min of vacancy, the ceiling fan throttles to {config.emptyRoomSpeed}% to save energy.
+            <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: 8, lineHeight: 1.5 }}>
+              After {config.occupancyTimeoutMinutes} min of vacancy, the ceiling fan automatically scales down to {config.emptyRoomSpeed}% to save power.
             </div>
           </div>
 
           <div style={{
             display: 'flex',
             alignItems: 'center',
-            gap: 6,
-            marginTop: 14,
-            fontSize: '0.78rem',
+            gap: 7,
+            marginTop: 16,
+            fontSize: '0.80rem',
             color: 'var(--text-secondary)',
+            fontWeight: 500,
           }}>
-            <Timer size={14} color="var(--accent-primary)" />
-            <span>Presence watchdog: {config.occupancyTimeoutMinutes} min timeout</span>
+            <Timer size={15} color="var(--accent-primary)" />
+            <span>Presence watchdog: {config.occupancyTimeoutMinutes} min automatic timeout</span>
           </div>
         </div>
 
         {/* Temperature chart */}
-        <div className="card-solid" style={{ padding: '22px' }}>
-          <div className="section-heading" style={{ marginBottom: 14 }}>Temperature Log</div>
-          <TelemetryChart type="temperature" height={190} />
+        <div className="card-solid" style={{ padding: '24px' }}>
+          <div style={{ marginBottom: 14 }}>
+            <div className="section-heading">Temperature History</div>
+            <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)', marginTop: 2 }}>
+              Comfort readings recorded over time
+            </div>
+          </div>
+          <TelemetryChart type="temperature" height={210} />
         </div>
       </div>
     </div>

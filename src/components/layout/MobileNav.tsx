@@ -43,7 +43,7 @@ export const MobileNav: React.FC = () => {
             key={item.id}
             onClick={() => setActiveNav(item.id)}
             style={{
-              background: 'transparent',
+              background: isActive ? 'var(--accent-primary-dim)' : 'transparent',
               border: 'none',
               color: isActive ? 'var(--accent-primary)' : 'var(--text-muted)',
               display: 'flex',
@@ -51,14 +51,14 @@ export const MobileNav: React.FC = () => {
               alignItems: 'center',
               gap: 3,
               padding: '6px 10px',
-              borderRadius: 8,
+              borderRadius: 'var(--radius-sm)',
               cursor: 'pointer',
               minWidth: 48,
-              transition: 'color var(--transition-fast)'
+              transition: 'all var(--transition-fast)'
             }}
           >
             <Icon size={19} color={isActive ? 'var(--accent-primary)' : 'var(--text-muted)'} />
-            <span style={{ fontSize: '0.66rem', fontWeight: isActive ? 600 : 500 }}>
+            <span style={{ fontSize: '0.66rem', fontWeight: isActive ? 700 : 500, fontFamily: 'var(--font-sans)' }}>
               {item.label}
             </span>
           </button>

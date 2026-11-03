@@ -60,19 +60,19 @@ export const SpeedDial: React.FC = () => {
   const isBusy = isApplying || commandPending;
 
   return (
-    <div className="card-solid" style={{ padding: '22px', borderRadius: 'var(--radius-lg)', position: 'relative' }}>
+    <div className="card-solid" style={{ padding: '24px', borderRadius: 'var(--radius-lg)', position: 'relative' }}>
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <div
             className="icon-container icon-container-teal"
-            style={{ width: 36, height: 36 }}
+            style={{ width: 38, height: 38, borderRadius: 'var(--radius-sm)' }}
           >
             <Wind size={18} />
           </div>
           <div>
             <div className="section-heading">Ceiling Fan Speed</div>
-            <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: 1 }}>
+            <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)', marginTop: 2 }}>
               {isConnected ? (isManual ? 'Manual setpoint' : 'Automatic mode') : 'Hardware offline'}
             </div>
           </div>
@@ -80,14 +80,15 @@ export const SpeedDial: React.FC = () => {
 
         {/* Running status badge */}
         <div style={{
-          fontSize: '0.72rem',
-          fontWeight: 600,
-          padding: '3px 10px',
+          fontSize: '0.74rem',
+          fontWeight: 700,
+          padding: '4px 12px',
           borderRadius: 'var(--radius-full)',
           background: isRunning ? 'var(--accent-primary-dim)' : 'var(--bg-secondary)',
           color: isRunning ? 'var(--accent-primary)' : 'var(--text-muted)',
-          border: `1px solid ${isRunning ? 'rgba(8, 127, 140, 0.25)' : 'var(--border-medium)'}`,
+          border: `1.5px solid ${isRunning ? 'rgba(8, 127, 140, 0.25)' : 'var(--border-card)'}`,
           fontVariantNumeric: 'tabular-nums',
+          boxShadow: isRunning ? 'var(--shadow-xs)' : 'none',
         }}>
           {isConnected
             ? (telemetry.hardwarePwmPercent !== null ? `${telemetry.hardwarePwmPercent}% PWM` : `${telemetry.requestedFanSpeedPercent}%`)
@@ -95,73 +96,104 @@ export const SpeedDial: React.FC = () => {
         </div>
       </div>
 
-      {/* Main stepper */}
+      {/* Stepper row */}
       <div style={{
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        padding: '8px 0 16px 0',
+        padding: '4px 0 18px 0',
         opacity: isConnected ? 1 : 0.5,
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
-          {/* Decrease */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 28 }}>
+          {/* Decrease button */}
           <button
             onClick={() => handleStep(-5)}
             disabled={!isConnected || stagedSpeed <= 0 || isBusy}
             aria-label="Decrease 5%"
             style={{
-              width: 40, height: 40,
+              width: 44, height: 44,
               borderRadius: '50%',
-              border: '1px solid var(--border-medium)',
-              background: 'var(--surface-1)',
-              boxShadow: 'var(--shadow-xs)',
+              border: '1.5px solid var(--border-card)',
+              background: 'var(--surface-card)',
+              boxShadow: 'var(--shadow-sm)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               color: 'var(--text-secondary)',
               cursor: (!isConnected || stagedSpeed <= 0) ? 'not-allowed' : 'pointer',
               transition: 'all var(--transition-fast)',
             }}
+            onMouseEnter={e => {
+              if (isConnected && stagedSpeed > 0) {
+                (e.currentTarget as HTMLButtonElement).style.background = 'var(--bg-secondary)';
+                (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-primary)';
+                (e.currentTarget as HTMLButtonElement).style.boxShadow = 'var(--shadow-md)';
+              }
+            }}
+            onMouseLeave={e => {
+              (e.currentTarget as HTMLButtonElement).style.background = 'var(--surface-card)';
+              (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-secondary)';
+              (e.currentTarget as HTMLButtonElement).style.boxShadow = 'var(--shadow-sm)';
+            }}
           >
-            <Minus size={16} />
+            <Minus size={18} />
           </button>
 
-          {/* Big speed number */}
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 3 }}>
+          {/* Big speed readout */}
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 3, minWidth: 110, justifyContent: 'center' }}>
             <span className="tabular-nums" style={{
               fontFamily: 'var(--font-display)',
-              fontSize: '3.6rem',
-              fontWeight: 700,
-              color: !isConnected ? 'var(--text-muted)' : stagedSpeed > 0 ? 'var(--accent-primary)' : 'var(--text-secondary)',
+              fontSize: '3.8rem',
+              fontWeight: 800,
+              color: !isConnected
+                ? 'var(--text-muted)'
+                : stagedSpeed > 0
+                  ? 'var(--accent-primary)'
+                  : 'var(--text-secondary)',
               lineHeight: 1,
-              letterSpacing: '-0.035em',
+              letterSpacing: '-0.04em',
+              transition: 'color var(--transition-fast)',
             }}>
               {isConnected ? stagedSpeed : '--'}
             </span>
-            <span style={{ fontSize: '1.4rem', color: 'var(--text-muted)', fontWeight: 600 }}>%</span>
+            <span style={{ fontSize: '1.5rem', color: 'var(--text-muted)', fontWeight: 600, fontFamily: 'var(--font-display)' }}>%</span>
           </div>
 
-          {/* Increase */}
+          {/* Increase button */}
           <button
             onClick={() => handleStep(5)}
             disabled={!isConnected || stagedSpeed >= 100 || isBusy}
             aria-label="Increase 5%"
             style={{
-              width: 40, height: 40,
+              width: 44, height: 44,
               borderRadius: '50%',
-              border: '1px solid var(--border-medium)',
-              background: 'var(--surface-1)',
-              boxShadow: 'var(--shadow-xs)',
+              border: '1.5px solid var(--border-card)',
+              background: 'var(--surface-card)',
+              boxShadow: 'var(--shadow-sm)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               color: 'var(--text-secondary)',
               cursor: (!isConnected || stagedSpeed >= 100) ? 'not-allowed' : 'pointer',
               transition: 'all var(--transition-fast)',
             }}
+            onMouseEnter={e => {
+              if (isConnected && stagedSpeed < 100) {
+                (e.currentTarget as HTMLButtonElement).style.background = 'var(--accent-primary)';
+                (e.currentTarget as HTMLButtonElement).style.color = '#FFFFFF';
+                (e.currentTarget as HTMLButtonElement).style.boxShadow = 'var(--shadow-teal)';
+                (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--accent-primary)';
+              }
+            }}
+            onMouseLeave={e => {
+              (e.currentTarget as HTMLButtonElement).style.background = 'var(--surface-card)';
+              (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-secondary)';
+              (e.currentTarget as HTMLButtonElement).style.boxShadow = 'var(--shadow-sm)';
+              (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--border-card)';
+            }}
           >
-            <Plus size={16} />
+            <Plus size={18} />
           </button>
         </div>
 
         {/* Slider */}
-        <div style={{ width: '100%', maxWidth: 380, marginTop: 20 }}>
+        <div style={{ width: '100%', maxWidth: 360, marginTop: 22, padding: '0 4px' }}>
           <input
             type="range"
             min="0" max="100" step="1"
@@ -172,19 +204,22 @@ export const SpeedDial: React.FC = () => {
             style={{
               width: '100%',
               background: isConnected
-                ? `linear-gradient(to right, var(--accent-primary) 0%, var(--accent-secondary) ${stagedSpeed}%, var(--bg-secondary) ${stagedSpeed}%, var(--bg-secondary) 100%)`
-                : 'var(--bg-secondary)',
+                ? `linear-gradient(to right, var(--accent-primary) 0%, var(--accent-secondary) ${stagedSpeed}%, var(--surface-3) ${stagedSpeed}%, var(--surface-3) 100%)`
+                : 'var(--surface-3)',
             }}
           />
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4, fontSize: '0.68rem', color: 'var(--text-muted)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6, fontSize: '0.70rem', color: 'var(--text-muted)', fontWeight: 500 }}>
             <span>Off</span>
+            <span>25%</span>
+            <span>50%</span>
+            <span>75%</span>
             <span>Max</span>
           </div>
         </div>
       </div>
 
       {/* Preset pills */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 6, marginTop: 4 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 7, marginBottom: 18 }}>
         {PRESETS.map(p => {
           const sel = isConnected && stagedSpeed === p.value;
           return (
@@ -193,17 +228,34 @@ export const SpeedDial: React.FC = () => {
               onClick={() => handlePreset(p.value)}
               disabled={!isConnected}
               style={{
-                padding: '7px 2px',
+                padding: '8px 4px',
                 borderRadius: 'var(--radius-sm)',
-                border: sel ? '1px solid rgba(8, 127, 140, 0.30)' : '1px solid var(--border-medium)',
-                background: sel ? 'var(--accent-primary-dim)' : 'var(--bg-secondary)',
+                border: sel ? '1.5px solid rgba(8, 127, 140, 0.35)' : '1.5px solid var(--border-card)',
+                background: sel
+                  ? 'linear-gradient(135deg, var(--accent-primary-dim) 0%, rgba(8,127,140,0.06) 100%)'
+                  : 'var(--surface-2)',
                 color: sel ? 'var(--accent-primary)' : 'var(--text-secondary)',
-                fontWeight: sel ? 600 : 500,
-                fontSize: '0.78rem',
+                fontWeight: sel ? 700 : 500,
+                fontSize: '0.80rem',
                 cursor: isConnected ? 'pointer' : 'not-allowed',
                 textAlign: 'center',
                 transition: 'all var(--transition-fast)',
                 fontFamily: 'var(--font-sans)',
+                boxShadow: sel ? 'var(--shadow-xs)' : 'none',
+              }}
+              onMouseEnter={e => {
+                if (isConnected && !sel) {
+                  (e.currentTarget as HTMLButtonElement).style.background = 'var(--surface-card)';
+                  (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--border-medium)';
+                  (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-primary)';
+                }
+              }}
+              onMouseLeave={e => {
+                if (!sel) {
+                  (e.currentTarget as HTMLButtonElement).style.background = 'var(--surface-2)';
+                  (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--border-card)';
+                  (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-secondary)';
+                }
               }}
             >
               {p.label}
@@ -214,7 +266,6 @@ export const SpeedDial: React.FC = () => {
 
       {/* Footer / Apply */}
       <div style={{
-        marginTop: 16,
         paddingTop: 14,
         borderTop: '1px solid var(--border-subtle)',
         display: 'flex',
@@ -224,12 +275,12 @@ export const SpeedDial: React.FC = () => {
         gap: 10,
       }}>
         {!isConnected ? (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.75rem', color: 'var(--color-error)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.78rem', color: 'var(--color-error)', fontWeight: 500 }}>
             <AlertCircle size={14} />
             <span>Connect hardware to control fan speed.</span>
           </div>
         ) : (
-          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+          <span style={{ fontSize: '0.76rem', color: 'var(--text-muted)', lineHeight: 1.4 }}>
             {hasUnapplied
               ? 'Tap Apply to send new speed to hardware.'
               : isManual ? 'Fan running at manual setpoint.' : 'Auto mode — system managing speed.'}
@@ -239,10 +290,9 @@ export const SpeedDial: React.FC = () => {
         <button
           onClick={handleApply}
           disabled={!isActionable || isBusy}
-          className={isActionable && !isBusy ? 'btn-primary' : ''}
           style={{
-            display: 'flex', alignItems: 'center', gap: 6,
-            padding: '9px 20px',
+            display: 'flex', alignItems: 'center', gap: 7,
+            padding: '10px 22px',
             borderRadius: 'var(--radius-sm)',
             border: 'none',
             background: isActionable && !isBusy
@@ -250,11 +300,22 @@ export const SpeedDial: React.FC = () => {
               : 'var(--bg-secondary)',
             color: isActionable && !isBusy ? '#FFFFFF' : 'var(--text-muted)',
             cursor: isActionable && !isBusy ? 'pointer' : 'not-allowed',
-            fontSize: '0.84rem',
-            fontWeight: 600,
+            fontSize: '0.875rem',
+            fontWeight: 700,
             boxShadow: isActionable && !isBusy ? 'var(--shadow-teal)' : 'none',
             transition: 'all var(--transition-fast)',
             fontFamily: 'var(--font-sans)',
+            letterSpacing: '0.01em',
+          }}
+          onMouseEnter={e => {
+            if (isActionable && !isBusy) {
+              (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(-1px)';
+              (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 6px 22px rgba(8,127,140,0.30)';
+            }
+          }}
+          onMouseLeave={e => {
+            (e.currentTarget as HTMLButtonElement).style.transform = 'none';
+            (e.currentTarget as HTMLButtonElement).style.boxShadow = isActionable && !isBusy ? 'var(--shadow-teal)' : 'none';
           }}
         >
           {isBusy ? (

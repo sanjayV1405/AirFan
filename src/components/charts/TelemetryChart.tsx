@@ -20,26 +20,26 @@ export const TelemetryChart: React.FC<TelemetryChartProps> = ({ type = 'temperat
   const [data, setData] = useState<TelemetryHistoryPoint[]>([]);
   const [timeFilter, setTimeFilter] = useState<'15m' | '1h' | 'all'>('15m');
 
-  // Soft Arctic light theme chart colors
-  const primaryColor = '#087F8C';
-  const secondaryColor = '#3979D8';
-  const warningColor = '#C07B2B';
-  const gridColor = 'rgba(23, 38, 59, 0.06)';
-  const axisColor = '#8FA3BB';
+  // Sage, Slate & Teal theme chart colors
+  const primaryColor = '#087F8C';      // Rich teal
+  const secondaryColor = '#397A65';    // Muted forest green
+  const warningColor = '#B5700A';      // Muted amber
+  const gridColor = 'rgba(29, 48, 46, 0.07)';
+  const axisColor = '#7A9490';
 
   const tooltipStyle = {
-    backgroundColor: 'rgba(250, 252, 254, 0.98)',
+    backgroundColor: 'rgba(248, 250, 248, 0.99)',
     backdropFilter: 'blur(8px)',
-    border: '1px solid rgba(8, 127, 140, 0.22)',
+    border: '1px solid rgba(8, 127, 140, 0.28)',
     borderRadius: 10,
-    boxShadow: '0 8px 24px rgba(23, 38, 59, 0.12)',
+    boxShadow: '0 8px 24px rgba(29, 48, 46, 0.12)',
     fontSize: '0.78rem',
-    color: '#17263B',
+    color: '#1D302E',
     padding: '8px 12px',
   };
 
-  const tooltipItemStyle = { color: '#17263B', fontSize: '0.78rem', fontWeight: 600 };
-  const tooltipLabelStyle = { color: '#617187', fontWeight: 600, marginBottom: 4, fontSize: '0.72rem' };
+  const tooltipItemStyle = { color: '#1D302E', fontSize: '0.78rem', fontWeight: 600 };
+  const tooltipLabelStyle = { color: '#526663', fontWeight: 600, marginBottom: 4, fontSize: '0.72rem' };
 
   useEffect(() => {
     const update = () => {
@@ -113,7 +113,7 @@ export const TelemetryChart: React.FC<TelemetryChartProps> = ({ type = 'temperat
           {type === 'temperature' ? (
             <AreaChart data={data} margin={{ top: 4, right: 8, left: -22, bottom: 0 }}>
               <defs>
-                <linearGradient id="tempGradLight" x1="0" y1="0" x2="0" y2="1">
+                <linearGradient id="tempGradSage" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor={primaryColor} stopOpacity={0.20} />
                   <stop offset="95%" stopColor={primaryColor} stopOpacity={0.02} />
                 </linearGradient>
@@ -122,7 +122,7 @@ export const TelemetryChart: React.FC<TelemetryChartProps> = ({ type = 'temperat
               <XAxis dataKey="timeStr" stroke={axisColor} fontSize={11} tickLine={false} axisLine={false} />
               <YAxis domain={['auto', 'auto']} stroke={axisColor} fontSize={11} unit="°" tickLine={false} axisLine={false} />
               <Tooltip contentStyle={tooltipStyle} itemStyle={tooltipItemStyle} labelStyle={tooltipLabelStyle} />
-              <Area type="monotone" dataKey="comfortTemp" name="Temperature (°C)" stroke={primaryColor} strokeWidth={2} fillOpacity={1} fill="url(#tempGradLight)" dot={false} />
+              <Area type="monotone" dataKey="comfortTemp" name="Temperature (°C)" stroke={primaryColor} strokeWidth={2} fillOpacity={1} fill="url(#tempGradSage)" dot={false} />
             </AreaChart>
           ) : type === 'humidity' ? (
             <LineChart data={data} margin={{ top: 4, right: 8, left: -22, bottom: 0 }}>
@@ -137,7 +137,7 @@ export const TelemetryChart: React.FC<TelemetryChartProps> = ({ type = 'temperat
           ) : (
             <AreaChart data={data} margin={{ top: 4, right: 8, left: -22, bottom: 0 }}>
               <defs>
-                <linearGradient id="fanGradLight" x1="0" y1="0" x2="0" y2="1">
+                <linearGradient id="fanGradSage" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor={secondaryColor} stopOpacity={0.18} />
                   <stop offset="95%" stopColor={secondaryColor} stopOpacity={0.02} />
                 </linearGradient>
@@ -146,7 +146,7 @@ export const TelemetryChart: React.FC<TelemetryChartProps> = ({ type = 'temperat
               <XAxis dataKey="timeStr" stroke={axisColor} fontSize={11} tickLine={false} axisLine={false} />
               <YAxis domain={[0, 100]} stroke={axisColor} fontSize={11} unit="%" tickLine={false} axisLine={false} />
               <Tooltip contentStyle={tooltipStyle} itemStyle={tooltipItemStyle} labelStyle={tooltipLabelStyle} />
-              <Area type="stepAfter" dataKey="fanSpeedPercent" name="Fan Speed (%)" stroke={secondaryColor} strokeWidth={2} fillOpacity={1} fill="url(#fanGradLight)" dot={false} />
+              <Area type="stepAfter" dataKey="fanSpeedPercent" name="Fan Speed (%)" stroke={secondaryColor} strokeWidth={2} fillOpacity={1} fill="url(#fanGradSage)" dot={false} />
             </AreaChart>
           )}
         </ResponsiveContainer>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAirLoop } from '../../context/AirLoopContext';
-import { WifiOff, Settings, RefreshCw, Clock } from 'lucide-react';
+import { WifiOff, Settings, RefreshCw, Clock, Wifi } from 'lucide-react';
 
 export const Header: React.FC = () => {
   const { connectionState, lastSuccessfulUpdate, pingLatency, reconnect, setActiveNav } = useAirLoop();
@@ -32,9 +32,9 @@ export const Header: React.FC = () => {
   return (
     <header style={{
       background: 'var(--header-bg)',
-      backdropFilter: 'blur(16px)',
-      WebkitBackdropFilter: 'blur(16px)',
-      borderBottom: '1px solid var(--header-border)',
+      backdropFilter: 'blur(18px)',
+      WebkitBackdropFilter: 'blur(18px)',
+      borderBottom: '1.5px solid var(--header-border)',
       position: 'sticky',
       top: 0,
       zIndex: 100,
@@ -42,9 +42,10 @@ export const Header: React.FC = () => {
       padding: '0 24px',
       display: 'flex',
       alignItems: 'center',
+      boxShadow: '0 1px 6px rgba(29, 48, 46, 0.06)',
     }}>
       <div style={{
-        maxWidth: 1440,
+        maxWidth: 1520,
         width: '100%',
         margin: '0 auto',
         display: 'flex',
@@ -53,13 +54,13 @@ export const Header: React.FC = () => {
         gap: 16,
       }}>
 
-        {/* ── Brand ──────────────────────────────────────────── */}
+        {/* ── Brand ────────────────────────────────────────────── */}
         <button
           onClick={() => setActiveNav('overview')}
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: 11,
+            gap: 12,
             background: 'none',
             border: 'none',
             cursor: 'pointer',
@@ -67,24 +68,32 @@ export const Header: React.FC = () => {
             userSelect: 'none',
           }}
         >
-          {/* Logo Mark */}
+          {/* Logo Mark — teal ventilation swirl */}
           <div style={{
-            width: 38,
-            height: 38,
-            borderRadius: 11,
-            background: 'linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%)',
+            width: 40,
+            height: 40,
+            borderRadius: 12,
+            background: 'linear-gradient(140deg, #087F8C 0%, #397A65 100%)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 2px 10px rgba(8, 127, 140, 0.28)',
+            boxShadow: '0 3px 12px rgba(8, 127, 140, 0.32)',
             flexShrink: 0,
+            position: 'relative',
+            overflow: 'hidden',
           }}>
-            <svg width="22" height="22" viewBox="0 0 32 32" fill="none">
-              {/* Airflow vane: two curved blades */}
-              <circle cx="16" cy="16" r="12" stroke="rgba(255,255,255,0.35)" strokeWidth="1.2" strokeDasharray="2.5 2.5" />
-              <path d="M16 5 A11 11 0 0 1 27 16 A5.5 5.5 0 0 0 21.5 16 A5.5 5.5 0 0 1 16 10.5 Z" fill="white" opacity="0.95"/>
-              <path d="M16 27 A11 11 0 0 1 5 16 A5.5 5.5 0 0 0 10.5 16 A5.5 5.5 0 0 1 16 21.5 Z" fill="white" opacity="0.70"/>
-              <circle cx="16" cy="16" r="3" fill="white"/>
+            {/* Subtle sheen */}
+            <div style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'linear-gradient(145deg, rgba(255,255,255,0.18) 0%, transparent 55%)',
+              borderRadius: 'inherit',
+            }} />
+            <svg width="24" height="24" viewBox="0 0 32 32" fill="none" style={{ position: 'relative', zIndex: 1 }}>
+              <circle cx="16" cy="16" r="11.5" stroke="rgba(255,255,255,0.28)" strokeWidth="1" strokeDasharray="3 3" />
+              <path d="M16 5.5 A10.5 10.5 0 0 1 26.5 16 A5.25 5.25 0 0 0 21.25 16 A5.25 5.25 0 0 1 16 10.75 Z" fill="white" opacity="0.95"/>
+              <path d="M16 26.5 A10.5 10.5 0 0 1 5.5 16 A5.25 5.25 0 0 0 10.75 16 A5.25 5.25 0 0 1 16 21.25 Z" fill="white" opacity="0.70"/>
+              <circle cx="16" cy="16" r="2.8" fill="white"/>
             </svg>
           </div>
 
@@ -92,43 +101,44 @@ export const Header: React.FC = () => {
           <div style={{ textAlign: 'left' }}>
             <div style={{
               fontFamily: 'var(--font-display)',
-              fontSize: '1.2rem',
+              fontSize: '1.25rem',
               fontWeight: 800,
-              letterSpacing: '-0.03em',
+              letterSpacing: '-0.035em',
               color: 'var(--text-primary)',
               lineHeight: 1.1,
             }}>
               AIRLOOP
             </div>
             <div style={{
-              fontSize: '0.65rem',
+              fontSize: '0.62rem',
               fontWeight: 600,
               color: 'var(--accent-primary)',
-              letterSpacing: '0.07em',
+              letterSpacing: '0.09em',
               textTransform: 'uppercase',
-              marginTop: 1,
+              marginTop: 2,
             }}>
               Smart Climate Control
             </div>
           </div>
         </button>
 
-        {/* ── Right: Status + Actions ────────────────────────── */}
+        {/* ── Right: Status + Actions ──────────────────────────── */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
 
-          {/* Connection Status */}
+          {/* Connection Status Pill */}
           {isConnected ? (
             <div style={{
               display: 'flex',
               alignItems: 'center',
               gap: 7,
               background: 'var(--color-success-bg)',
-              border: '1px solid rgba(26, 158, 106, 0.22)',
+              border: '1.5px solid rgba(27, 138, 90, 0.25)',
               color: 'var(--color-success)',
-              padding: '5px 12px',
+              padding: '5px 13px',
               borderRadius: 'var(--radius-full)',
-              fontSize: '0.78rem',
-              fontWeight: 600,
+              fontSize: '0.80rem',
+              fontWeight: 700,
+              boxShadow: 'var(--shadow-xs)',
             }}>
               <div
                 className="live-indicator"
@@ -140,9 +150,10 @@ export const Header: React.FC = () => {
                   flexShrink: 0,
                 }}
               />
-              <span>Hardware Connected</span>
+              <Wifi size={12} />
+              <span>Connected</span>
               {pingLatency !== null && (
-                <span style={{ opacity: 0.7, fontSize: '0.70rem' }}>· {pingLatency}ms</span>
+                <span style={{ opacity: 0.65, fontSize: '0.70rem' }}>· {pingLatency}ms</span>
               )}
             </div>
           ) : isConnecting ? (
@@ -151,15 +162,15 @@ export const Header: React.FC = () => {
               alignItems: 'center',
               gap: 7,
               background: 'var(--color-info-dim)',
-              border: '1px solid rgba(57, 121, 216, 0.22)',
+              border: '1.5px solid rgba(47, 111, 181, 0.25)',
               color: 'var(--color-info)',
-              padding: '5px 12px',
+              padding: '5px 13px',
               borderRadius: 'var(--radius-full)',
-              fontSize: '0.78rem',
-              fontWeight: 600,
+              fontSize: '0.80rem',
+              fontWeight: 700,
             }}>
               <RefreshCw size={12} className="spin" />
-              <span>Connecting...</span>
+              <span>Connecting…</span>
             </div>
           ) : (
             <div style={{
@@ -167,26 +178,26 @@ export const Header: React.FC = () => {
               alignItems: 'center',
               gap: 7,
               background: 'var(--color-error-bg)',
-              border: '1px solid rgba(192, 57, 43, 0.22)',
+              border: '1.5px solid rgba(184, 50, 50, 0.25)',
               color: 'var(--color-error)',
-              padding: '5px 12px 5px 10px',
+              padding: '5px 10px 5px 12px',
               borderRadius: 'var(--radius-full)',
-              fontSize: '0.78rem',
-              fontWeight: 600,
+              fontSize: '0.80rem',
+              fontWeight: 700,
             }}>
-              <WifiOff size={13} />
+              <WifiOff size={12} />
               <span>Disconnected</span>
               <button
                 onClick={handleReconnect}
                 disabled={isReconnecting}
                 style={{
-                  background: 'rgba(192, 57, 43, 0.12)',
-                  border: '1px solid rgba(192, 57, 43, 0.25)',
+                  background: 'rgba(184, 50, 50, 0.14)',
+                  border: '1px solid rgba(184, 50, 50, 0.28)',
                   color: 'var(--color-error)',
                   borderRadius: 'var(--radius-xs)',
-                  padding: '3px 8px',
+                  padding: '3px 9px',
                   fontSize: '0.68rem',
-                  fontWeight: 600,
+                  fontWeight: 700,
                   cursor: isReconnecting ? 'wait' : 'pointer',
                   display: 'flex',
                   alignItems: 'center',
@@ -201,7 +212,7 @@ export const Header: React.FC = () => {
             </div>
           )}
 
-          {/* Last updated — desktop only */}
+          {/* Last updated chip */}
           {isConnected && (
             <div
               className="hidden-mobile"
@@ -211,28 +222,29 @@ export const Header: React.FC = () => {
                 gap: 5,
                 fontSize: '0.74rem',
                 color: 'var(--text-muted)',
-                padding: '5px 10px',
+                padding: '5px 11px',
                 borderRadius: 'var(--radius-sm)',
                 background: 'var(--bg-secondary)',
-                border: '1px solid var(--border-subtle)',
+                border: '1.5px solid var(--border-card)',
+                boxShadow: 'var(--shadow-xs)',
               }}
             >
-              <Clock size={12} />
+              <Clock size={11} />
               <span>{relativeTime}</span>
             </div>
           )}
 
-          {/* Settings Button */}
+          {/* Settings button */}
           <button
             onClick={() => setActiveNav('settings')}
             title="Settings"
             aria-label="Open settings"
             style={{
-              width: 36,
-              height: 36,
+              width: 38,
+              height: 38,
               borderRadius: 'var(--radius-sm)',
-              background: 'var(--btn-subtle-bg)',
-              border: '1px solid var(--btn-subtle-border)',
+              background: 'var(--bg-secondary)',
+              border: '1.5px solid var(--border-card)',
               color: 'var(--text-secondary)',
               display: 'flex',
               alignItems: 'center',
@@ -242,14 +254,16 @@ export const Header: React.FC = () => {
               boxShadow: 'var(--shadow-xs)',
             }}
             onMouseEnter={e => {
-              (e.currentTarget as HTMLButtonElement).style.background = 'var(--btn-subtle-hover)';
+              (e.currentTarget as HTMLButtonElement).style.background = 'var(--surface-card)';
               (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--border-medium)';
               (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-primary)';
+              (e.currentTarget as HTMLButtonElement).style.boxShadow = 'var(--shadow-sm)';
             }}
             onMouseLeave={e => {
-              (e.currentTarget as HTMLButtonElement).style.background = 'var(--btn-subtle-bg)';
-              (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--btn-subtle-border)';
+              (e.currentTarget as HTMLButtonElement).style.background = 'var(--bg-secondary)';
+              (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--border-card)';
               (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-secondary)';
+              (e.currentTarget as HTMLButtonElement).style.boxShadow = 'var(--shadow-xs)';
             }}
           >
             <Settings size={17} />
